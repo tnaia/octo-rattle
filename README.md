@@ -2,10 +2,14 @@
 
 Literate programming is great, right?
 
-This is a small project to play with some literate programming ideas.
+This is a toy program for playing with literate programming.
 
-- `visconde.py` is a simple tangler
+- `visconde.py` is a simple tangler (written in python 3)
 - `visconde.lt` is the literate source for `visconde.py`
+
+Run `python3 visconde.py your-source-file-here.lt` to compile `your-source-file.lt`
+
+As it is, the tangler is language-agnostic. 
 
 ## Todo
 
@@ -22,7 +26,7 @@ Please let us know!
 
 ## Thanks
 
-(Knuth)[http://www-cs-faculty.stanford.edu/~knuth/], (Zachary Yedidia)[https://github.com/zyedidia], (José Augusto)[www.ime.usp.br/~jose/]
+[Knuth](http://www-cs-faculty.stanford.edu/~knuth/), [Zachary Yedidia](https://github.com/zyedidia), [José Augusto](www.ime.usp.br/~jose/).
 
 ## Apology
 
