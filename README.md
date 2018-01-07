@@ -13,6 +13,9 @@ As it is, the tangler is language-agnostic.
 
 ## Todo
 
+- [ ] Warn if multiple root files are found (only proceed to
+  generating these files if a flag is set)
+- [ ] flag for dry-run (just warnigs, no output)
 - [ ] flag to generate specific output files
 - [ ] weave!
 

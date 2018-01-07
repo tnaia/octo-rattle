@@ -179,7 +179,10 @@ def chunk_in_references(block_text):
     return references
 ```
 
-We finally handle writing each root block to a file. The list `acc` accumulates all lines of the file `blk`.
+We finally handle writing each root block to a file.
+The next lines to be output are stored in a buffer.
+More precisely, `buffer[i]` is the next we'll output,
+which we first expand (when it is a chunk reference).
 
 ``` write `blk` to a file
 print("Writing file %s... " % blk,end='')
