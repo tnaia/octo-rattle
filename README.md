@@ -1,4 +1,4 @@
-# Visconde, a literate toy/cob
+# Visconde, a literate cob :corn:
 
 Literate programming is great, right?
 
@@ -11,8 +11,75 @@ Run `python3 visconde.py your-source-file-here.lt` to compile `your-source-file.
 
 As it is, the tangler is language-agnostic. 
 
+## Basic usage
+
+Code appears between fenced lines (like in GitHub flavoured Markdown);
+each code chunk is named (their name appears after the fence, on the same line)
+fences may have three or more backticks, 
+(so long as open- and close-fence have the same number of them).
+Write `@{fla fli flow}` on a line of its own to refer to chunk
+named `fla fli flow`. 
+
+    This line is text. It is just ignored.
+    More text, ignored as well.
+    
+    - and this is, too;
+    - so is this;
+    - getting bored now.
+
+    ``` foo-bar
+    @{two}
+        @{one}
+    if True:
+        @{two}
+    @{one}
+    ```
+    
+    You may or may not have text between chunks.
+    
+    ``` one
+    --1--
+    --1-- ends here
+    ```
+    
+    ``` two
+    --2-- 
+        @{three}
+    --2-- ends here
+    ```
+
+    ``` three
+    --3--
+    ```
+
+    ``` foo-bar-2
+    Another file.
+    ```
+    
+When tangled, generates two files. 
+
+File `foo-bar` contains the lines
+
+    --2--
+        --3--
+    --2-- ends here
+        --1--
+        --1-- ends here
+    if True:
+        --2--
+            --3--
+        --2-- ends here
+    --1--
+    --1-- ends here
+        
+and file `foo-bar-2` contains the lines
+
+    Another file.
+
+
 ## Todo
 
+- [ ] warn if file ends before code block does
 - [ ] Warn if multiple root files are found (only proceed to
   generating these files if a flag is set)
 - [ ] flag for dry-run (just warnigs, no output)
@@ -37,7 +104,7 @@ I'm sorry.
 
 ## License
 
-GPL version 3.0 or later. See LICENSE for details.
+Copyright (c) 2018: Tássio Naia. GPL version 3.0 or later. See LICENSE for details.
 
 ## Keywords
 
