@@ -1,10 +1,10 @@
-@title Basic literate tool in python
+# Basic literate tool in python
 
-@s Introduction
+## Introduction
 
 This is a rough tool for literate programming, built along the lines 
-of the CWEB program of (Knuth and Levy)[https://cs.stanford.edu/~knuth/lp.html]. 
-Our syntax follows that of (Literate)[https://github.com/zyedidia/Literate/]. 
+of the CWEB program of [Knuth and Levy](https://cs.stanford.edu/~knuth/lp.html). 
+Our syntax follows that of [Literate](https://github.com/zyedidia/Literate/). 
 We only implement a subset of these programs' functionality.
 
 More precisely, this program is a minimal "tangler" which operates on a single
@@ -30,7 +30,7 @@ The line below should be updated whenever this program is changed.
 banner = "This is COB version 0.1.1."
 ```
 
-@s Arguments
+## Arguments
 
 
 For now, the only argument to the program is the target file.
@@ -48,7 +48,7 @@ file = ""
 ```
 
 
-@s Storing chunks
+## Storing chunks
 
 When tangling, we only care about code chunks, and all of these must be named.
 
@@ -126,7 +126,7 @@ else:
 chunk = {}
 ```
 
-@s From chunks to files
+## From chunks to files
 
 At this point, all code is loaded in the `chunk` dictionary.
 If chunk `s` does not appear in the text of any other chunk, 
