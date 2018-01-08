@@ -7,7 +7,8 @@ This is a toy program for playing with literate programming.
 - `visconde.py` is a simple tangler (written in python 3)
 - `visconde.lt` is the literate source for `visconde.py`
 
-Run `python3 visconde.py your-source-file-here.lt` to compile `your-source-file.lt`
+Run `python3 visconde.py your-source-file-here` to compile generate
+extract the non-literate code from the literate source `your-source-file`.
 
 As it is, the tangler is language-agnostic. 
 
