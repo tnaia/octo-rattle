@@ -1,19 +1,12 @@
 import sys
 import re
 
-banner = "This is COB version 0.1.2."
+banner = "This is VISCONDE version 0.1.2."
 file = ""
 fence_regexp = re.compile('```+')
 chunk = {}
-def chunk_in_references(chunk_text):
-    references = []
-    for line in chunk_text:
-        line = line.strip() 
-        # here we would remove comments in the line as well
-        if is_chunk_line(line):
-            references += [line[2:-1].strip()]
-
-    return references
+def chunks_of(code):
+    return [line.strip()[2:-1].strip() for line in code if is_chunk_line(line)]
 def is_chunk_line(l):
     aux = l.strip()
     return aux and (aux[0:2] == '@{' and aux[-1] == '}')
@@ -32,6 +25,7 @@ with open(file, 'r') as input_file:
     last_line_blank = False
     chunk_name = ''
     chunk_text = [] # list of lines
+
     for line_number, line in enumerate(input_file):
         if not reading_code_chunk:
             if line.strip() == "":
@@ -65,7 +59,7 @@ for blk in chunk:
     if blk not in used_at:
         used_at[blk] = []
     for l,b in chunk[blk]:
-        for chk in chunk_in_references(b):
+        for chk in chunks_of(b):
             if chk not in used_at:
                 used_at[chk] = [blk]
             else:
