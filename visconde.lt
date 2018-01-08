@@ -9,10 +9,10 @@ We only implement a subset of these programs' functionality.
 
 More precisely, this program is a minimal "tangler" which operates on a single
 input file, under the restriction that any chunk reference `@{chunk name}` lies 
-on a line  of its own (in particular, no comments allowed in a line referencing 
+on a line  of its own (so, no comments are allowed in a line that references
 a chunk, and a chunk name cannot contain line breaks).
 
-Here is the program outline
+Here is the program outline.
 
 ``` visconde.py
 @{imports}
@@ -27,7 +27,7 @@ Here is the program outline
 The line below should be updated whenever this program is changed.
 
 ``` global definitions
-banner = "This is COB version 0.1.1."
+banner = "This is COB version 0.1.2."
 ```
 
 ## Arguments
@@ -62,19 +62,18 @@ with open(file, 'r') as input_file:
     chunk_name = ''
     chunk_text = [] # list of lines
     for line_number, line in enumerate(input_file):
-        @{read lines until code chunk; store `chunk_name` and set `reading_code_chunk`}
+        @{continue if not in code chunk; store `chunk_name` and set `reading_code_chunk`}
     
-        # Now reading code chunk
         @{add line to `chunk_text` or complete and store chunk}
 ```
 
 Every code chunk is preceeded by a blank line (i.e., a line with only whitespace).
-The first line of a code chunk begins with three or more dashes (`---`), 
-followed by the chunk name. The last line of a code chunk contains only dashes,
+The first line of a code chunk begins with three or more backticks (` ``` `), 
+followed by the chunk name. The last line of a code chunk contains only backticks,
 (as many as there were at the chunk's first line).
 
 ``` global definitions
-dashes_regexp = re.compile('```+')
+fence_regexp = re.compile('```+')
 ```
 
 ``` imports
@@ -82,19 +81,19 @@ import re
 ```
 
 Note that each branch inside the first `if` statement below 
-ends with `continue`, so we only proceed past the first if 
+ends with `continue`, so we only proceed reach `@{add line to...}`
 when `reading_code_chunk == True`.
 
-``` read lines until code chunk; store `chunk_name` and set `reading_code_chunk`
+``` continue if not in code chunk; store `chunk_name` and set `reading_code_chunk`
 if not reading_code_chunk:
     if line.strip() == "":
         last_line_blank = True
         continue
     elif last_line_blank:
-        match_dashes = dashes_regexp.match(line) # at least 3 dashes
-        if match_dashes:
-            num_dashes = match_dashes.end()
-            chunk_name = line[num_dashes:].strip()
+        match_fence = fence_regexp.match(line) # at least 3 backticks
+        if match_fence:
+            fence_length = match_fence.end()
+            chunk_name = line[fence_length:].strip()
             chunk_line = line_number
             chunk_text = []
             reading_code_chunk = True
@@ -105,14 +104,13 @@ if not reading_code_chunk:
 ```
 
 We store the code of chunks in a dictionary `chunk`.
-Each dictionary entry is a list of tuples `(line_num, code)`
-containing 
+Each dictionary entry is a list of tuples `(line_num, code)` containing 
 - the line number of the first line of the chunk, and
 - the code in the chunk.
 
 ``` add line to `chunk_text` or complete and store chunk
-match_dashes = dashes_regexp.match(line) # at least 3 dashes
-if match_dashes and match_dashes.end() == num_dashes:
+match_fence = fence_regexp.match(line) # at least 3 backticks
+if match_fence and match_fence.end() == fence_length:
     if chunk_name not in chunk:
         chunk[chunk_name] = []
     chunk[chunk_name] += [(chunk_line+1, chunk_text)]
@@ -129,8 +127,8 @@ chunk = {}
 ## From chunks to files
 
 At this point, all code is loaded in the `chunk` dictionary.
-If chunk `'blabla'` does not appear in the text of any other chunk, 
-we will create a file whose contents will be `chunk['blabla']`,
+If chunk `'blabla'` isn't referenced by any other chunk, 
+we create a file whose contents will be `chunk['blabla']`,
 with lines of the form `@{blabla}` replaced by the contents 
 of the chunk `'blabla'`.
 

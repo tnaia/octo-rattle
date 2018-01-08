@@ -1,9 +1,9 @@
 import sys
 import re
 
-banner = "This is COB version 0.1.1."
+banner = "This is COB version 0.1.2."
 file = ""
-dashes_regexp = re.compile('```+')
+fence_regexp = re.compile('```+')
 chunk = {}
 def chunk_in_references(chunk_text):
     references = []
@@ -38,10 +38,10 @@ with open(file, 'r') as input_file:
                 last_line_blank = True
                 continue
             elif last_line_blank:
-                match_dashes = dashes_regexp.match(line) # at least 3 dashes
-                if match_dashes:
-                    num_dashes = match_dashes.end()
-                    chunk_name = line[num_dashes:].strip()
+                match_fence = fence_regexp.match(line) # at least 3 backticks
+                if match_fence:
+                    fence_length = match_fence.end()
+                    chunk_name = line[fence_length:].strip()
                     chunk_line = line_number
                     chunk_text = []
                     reading_code_chunk = True
@@ -50,9 +50,8 @@ with open(file, 'r') as input_file:
         
             continue
     
-        # Now reading code chunk
-        match_dashes = dashes_regexp.match(line) # at least 3 dashes
-        if match_dashes and match_dashes.end() == num_dashes:
+        match_fence = fence_regexp.match(line) # at least 3 backticks
+        if match_fence and match_fence.end() == fence_length:
             if chunk_name not in chunk:
                 chunk[chunk_name] = []
             chunk[chunk_name] += [(chunk_line+1, chunk_text)]

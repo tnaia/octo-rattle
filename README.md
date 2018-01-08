@@ -80,11 +80,15 @@ and file `foo-bar-2` contains the lines
 
 ## Todo
 
-- [ ] warn if file ends before code block does
-- [ ] Warn if multiple root files are found (only proceed to
-  generating these files if a flag is set)
-- [ ] flag for dry-run (just warnigs, no output)
-- [ ] flag to generate specific output files
+- Warnings
+  - [ ] file ends before code chunk does
+  - [ ] circular chunk dependencies
+  - [ ] multiple root files are found (only generate multiple output
+    files if a flag is set)
+- Flags
+  - [ ] generate a file for each root chunk
+  - [ ] flag for dry-run (just warnigs, no output)
+  - [ ] generate file with expansion of chunk (let user specify filename)
 - [ ] weave!
 
 ## Nice to have
