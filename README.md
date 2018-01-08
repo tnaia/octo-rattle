@@ -96,7 +96,7 @@ Please let us know!
 
 ## Thanks
 
-[Knuth](http://www-cs-faculty.stanford.edu/~knuth/), [Zachary Yedidia](https://github.com/zyedidia), [José Augusto](www.ime.usp.br/~jose/).
+[Knuth](http://www-cs-faculty.stanford.edu/~knuth/), [Zachary Yedidia](https://github.com/zyedidia), [José Augusto](http://www.ime.usp.br/~jose/).
 
 ## Apology
 
