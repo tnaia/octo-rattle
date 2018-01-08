@@ -2,14 +2,14 @@
 
 @s Introduction
 
-This is a rough tool for simle literate programming, built along the lines 
-of the CWEB program of (Knuth and Levy)[https://cs.stanford.edu/~knuth/lp.html], 
-whose syntax follows that of (Literate)[https://github.com/zyedidia/Literate/]. 
+This is a rough tool for literate programming, built along the lines 
+of the CWEB program of (Knuth and Levy)[https://cs.stanford.edu/~knuth/lp.html]. 
+Our syntax follows that of (Literate)[https://github.com/zyedidia/Literate/]. 
 We only implement a subset of these programs' functionality.
 
 More precisely, this program is a minimal "tangler" which operates on a single
 input file, under the restriction that any chunk `@{chunk name}` lies on a line 
-of its own (in particular, no comments allowed in a line that references a chunk, 
+of its own (in particular, no comments allowed in a line referencing a chunk, 
 and a chunk name cannot contain line breaks).
 
 Here is the program outline
@@ -27,7 +27,7 @@ Here is the program outline
 The line below should be updated whenever this program is changed.
 
 ``` global definitions
-banner = "This is COB version 0.1."
+banner = "This is COB version 0.1.1."
 ```
 
 @s Arguments
@@ -48,30 +48,30 @@ file = ""
 ```
 
 
-@s Storing blocks
+@s Storing chunks
 
-When tangling, we only care about code blocks, and all of these must be named.
+When tangling, we only care about code chunks, and all of these must be named.
 
 
 ``` process input file
 print(banner) # Hi!
 
 with open(file, 'r') as input_file:
-    reading_code_block = False
+    reading_code_chunk = False
     last_line_blank = False
-    block_name = ''
-    block_text = [] # list of lines
+    chunk_name = ''
+    chunk_text = [] # list of lines
     for line_number, line in enumerate(input_file):
-        @{read lines until code block; store `block_name` and set `reading_code_block`}
+        @{read lines until code chunk; store `chunk_name` and set `reading_code_chunk`}
     
-        # Now reading code block
-        @{add line to `block_text` or complete and store block}
+        # Now reading code chunk
+        @{add line to `chunk_text` or complete and store chunk}
 ```
 
-Every code block is preceeded by a blank line (i.e., a line with only whitespace).
-The first line of a code block begins with three or more dashes (`---`), 
-followed by the block name. The last line of a code block contains only dashes,
-(as many as there were at the block's first line).
+Every code chunk is preceeded by a blank line (i.e., a line with only whitespace).
+The first line of a code chunk begins with three or more dashes (`---`), 
+followed by the chunk name. The last line of a code chunk contains only dashes,
+(as many as there were at the chunk's first line).
 
 ``` global definitions
 dashes_regexp = re.compile('```+')
@@ -83,10 +83,10 @@ import re
 
 Note that each branch inside the first `if` statement below 
 ends with `continue`, so we only proceed past the first if 
-when `reading_code_block == True`.
+when `reading_code_chunk == True`.
 
-``` read lines until code block; store `block_name` and set `reading_code_block`
-if not reading_code_block:
+``` read lines until code chunk; store `chunk_name` and set `reading_code_chunk`
+if not reading_code_chunk:
     if line.strip() == "":
         last_line_blank = True
         continue
@@ -94,68 +94,68 @@ if not reading_code_block:
         match_dashes = dashes_regexp.match(line) # at least 3 dashes
         if match_dashes:
             num_dashes = match_dashes.end()
-            block_name = line[num_dashes:].strip()
-            block_line = line_number
-            block_text = []
-            reading_code_block = True
+            chunk_name = line[num_dashes:].strip()
+            chunk_line = line_number
+            chunk_text = []
+            reading_code_chunk = True
         else:
             last_line_blank = False
 
     continue
 ```
 
-We store the code of blocks in a dictionary `block`.
+We store the code of chunks in a dictionary `chunk`.
 Each dictionary entry is a list of tuples `(line_num, code)`
 containing 
 - the line number of the first line of the chunk, and
 - the code in the chunk.
 
-``` add line to `block_text` or complete and store block
+``` add line to `chunk_text` or complete and store chunk
 match_dashes = dashes_regexp.match(line) # at least 3 dashes
 if match_dashes and match_dashes.end() == num_dashes:
-    if block_name not in block:
-        block[block_name] = []
-    block[block_name] += [(block_line+1, block_text)]
-    reading_code_block = False
+    if chunk_name not in chunk:
+        chunk[chunk_name] = []
+    chunk[chunk_name] += [(chunk_line+1, chunk_text)]
+    reading_code_chunk = False
     last_line_blank = False
 else:
-    block_text += [line]
+    chunk_text += [line]
 ```
 
 ``` global definitions
-block = {}
+chunk = {}
 ```
 
-@s From blocks to files
+@s From chunks to files
 
-At this point, all code is loaded in the `block` dictionary.
-If block `s` does not appear in the text of any other block, 
-we will create a file whose contents will be `block[s]`,
+At this point, all code is loaded in the `chunk` dictionary.
+If chunk `s` does not appear in the text of any other chunk, 
+we will create a file whose contents will be `chunk[s]`,
 with lines of the form `@{xxx}` replaced by the contents 
-of the block `"xxx"`.
+of the chunk `"xxx"`.
 
-The first step is to identify which blocks are *roots*, 
-that is, which blocks will be turned to files. 
+The first step is to identify which chunks are *roots*, 
+that is, which chunks will be turned to files. 
 
 ``` output tangled sources
 used_at = dict()
 
-@{build list of `root_blocks`}
+@{build list of `root_chunks`}
 
-for blk in root_blocks:
+for blk in root_chunks:
     @{write `blk` to a file}
 ```
 
-In order to locate 'root blocks', we use a dictionary `used_at`,
+In order to locate 'root chunks', we use a dictionary `used_at`,
 so (for instance) `used_at['global defintions']` is a list of
-`block_name`s which contain `@{global definitions}` in their
+`chunk_name`s which contain `@{global definitions}` in their
 text.
 
-``` build list of `root_blocks`
-for blk in block:
+``` build list of `root_chunks`
+for blk in chunk:
     if blk not in used_at:
         used_at[blk] = []
-    for l,b in block[blk]:
+    for l,b in chunk[blk]:
         for chk in chunk_in_references(b):
             if chk not in used_at:
                 used_at[chk] = [blk]
@@ -163,14 +163,14 @@ for blk in block:
                 used_at[chk] += [blk]
 
 # expansion_order = [blk for blk, parents in sorted(used_at.items(), key=lambda t: len(t[1]),reverse=True)]
-root_blocks = [blk for blk, parents in used_at.items() if len(parents) == 0]
+root_chunks = [blk for blk, parents in used_at.items() if len(parents) == 0]
 
 ```
 
 ``` global definitions
-def chunk_in_references(block_text):
+def chunk_in_references(chunk_text):
     references = []
-    for line in block_text:
+    for line in chunk_text:
         line = line.strip() 
         # here we would remove comments in the line as well
         if is_chunk_line(line):
@@ -179,7 +179,7 @@ def chunk_in_references(block_text):
     return references
 ```
 
-We finally handle writing each root block to a file.
+We finally handle writing each root chunk to a file.
 The next lines to be output are stored in a buffer.
 More precisely, `buffer[i]` is the next we'll output,
 which we first expand (when it is a chunk reference).
@@ -187,7 +187,7 @@ which we first expand (when it is a chunk reference).
 ``` write `blk` to a file
 print("Writing file %s... " % blk,end='')
 with open(blk, 'w') as output:
-    buffer = [l for c in block[blk] for l in c[1]]
+    buffer = [l for c in chunk[blk] for l in c[1]]
     i = 0
     while i < len(buffer):
         if is_chunk_line(buffer[i]):
@@ -201,11 +201,11 @@ print("[ DONE ]")
 
 ``` add contents of chunk to buffer
 the_chunk_name = chunk_line_name(buffer[i])
-if the_chunk_name not in block:       # do we know what to insert in place of line?
+if the_chunk_name not in chunk:       # do we know what to insert in place of line?
     @{warn of missing chunk}
 else:
     indentation = re.compile(' *').match(buffer[i]).end()
-    indented_lines = [x for l,c in  block[the_chunk_name] for x in indent_code(indentation, c)]
+    indented_lines = [x for l,c in  chunk[the_chunk_name] for x in indent_code(indentation, c)]
     buffer = indented_lines + buffer[i+1:]
     i = 0
 ```
