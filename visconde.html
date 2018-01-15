@@ -80,7 +80,7 @@ call to <code>visconde</code> would look like this</p>
 <p>Where <code>OPTIONS</code> can be one or more of the following.</p>
 
 <ul>
-<li><code>--fencedwithlanguage</code> first word (at the same line but) after opening fence treated as language of the code block</li>
+<li><code>--fencedwithlanguage</code> first word (at the same line but) after opening fence treated as language of the code chunk</li>
 <li><code>--nofencedwithlanguage</code> text (at same line but) after opening fence treated as chunk name</li>
 <li><code>--manyoutputs</code> generate one output file per root chunk</li>
 <li><code>--nomanyoutputs</code> error (and no output files) if more than one root chunk</li>
@@ -92,51 +92,48 @@ call to <code>visconde</code> would look like this</p>
 <div class="codeblock"><span class="codeblock_name">{<strong>parse arguments</strong>}</span>
 
 <pre class="prettyprint language-python">
+@{build argument parser}
+@{set flags}
+</pre></div>
+
+
+<p>All flags appear in pairs.</p>
+
+<div class="codeblock"><span class="codeblock_name">{<strong>build  argument parser</strong>}</span>
+
+<pre class="prettyprint language-python">
+# file =================================================================
 parser.add_argument("file", help="literate source file")
 
 # fencedwithlanguage ===================================================
-parser.add_argument("--fencedwithlanguage", help="first word on opening fence is language; the rest is chunk name",
-                    action="store_true")
-parser.add_argument("--nofencedwithlanguage", help="text on opening fence is chunk name (default)",
-                    action="store_true")
+parser.add_argument(  "--fencedwithlanguage", action="store_true", 
+    help="first word on opening fence is language; the rest is chunk name")
+parser.add_argument("--nofencedwithlanguage", action="store_true", 
+    help="text on opening fence is chunk name (default)")
+
 # manyoutputs ==========================================================
-parser.add_argument("--manyoutputs", help="generate one output file per root chunk",
-                    action="store_true")
-parser.add_argument("--nomanyoutputs", help="generate one output file per root chunk (default)",
-                    action="store_true")
+parser.add_argument(         "--manyoutputs", action="store_true", 
+    help="generate one output file per root chunk")
+parser.add_argument(       "--nomanyoutputs", action="store_true", 
+    help="generate one output file per root chunk (default)")
+
 # tangle ===============================================================
-parser.add_argument("--tangle", help="produce tangled outputs (default)",
-                    action="store_true")
-parser.add_argument("--notangle", help="do not produce tangled outputs",
-                    action="store_true")
+parser.add_argument(              "--tangle", action="store_true", 
+    help="produce tangled outputs (default)")
+parser.add_argument(            "--notangle", action="store_true", 
+    help="do not produce tangled outputs")
 
-
+# ======================================================================
 args = parser.parse_args()
+</pre></div>
 
-# input file
-file = args.file
 
-# flag (no)fencedwithlanguage
-if args.fencedwithlanguage and args.nofencedwithlanguage:
-    print('! error: contradictory flags (fencedwithlanguage and nofencedwithlanguage)')
-    #todo abort
 
-fenced_with_language = args.fencedwithlanguage
 
-# flag (no)manyoutputs
-if args.manyoutputs and args.nomanyoutputs:
-    print('! error: contradictory flags (manyoutputs and nomanyoutputs)')
-    #todo abort
+<div class="codeblock"><span class="codeblock_name">{<strong>global definitions</strong>}</span>
 
-many_outpus = args.manyoutputs
-
-# flag (no)tangle
-if args.tangle and args.notangle:
-    print('! error: contradictory flags (tangle and notangle)')
-    #todo abort
-
-tangle = not args.notangle
-
+<pre class="prettyprint language-python">
+parser = argparse.ArgumentParser()
 </pre></div>
 
 
@@ -149,16 +146,49 @@ import argparse
 </pre></div>
 
 
+<p>It is time to enforce the default behaviour for each pair of flags
+<code>--xxx</code>/<code>--noxxx</code>, and check for sanity.</p>
 
+<div class="codeblock"><span class="codeblock_name">{<strong>set flags</strong>}</span>
+
+<pre class="prettyprint language-python">
+# input file ===========================================================
+file = args.file
+
+# flag (no)fencedwithlanguage ==========================================
+if args.fencedwithlanguage and args.nofencedwithlanguage:
+    print('! error: contradictory flags (fencedwithlanguage and nofencedwithlanguage)')
+    #todo abort
+
+fenced_with_language = args.fencedwithlanguage
+
+# flag (no)manyoutputs =================================================
+if args.manyoutputs and args.nomanyoutputs:
+    print('! error: contradictory flags (manyoutputs and nomanyoutputs)')
+    #todo abort
+
+many_outpus = args.manyoutputs
+
+# flag (no)tangle ======================================================
+if args.tangle and args.notangle:
+    print('! error: contradictory flags (tangle and notangle)')
+    #todo abort
+
+tangle = not args.notangle
+</pre></div>
+
+
+<p>The flags are available to the rest of the program via the global
+variables <code>file</code>, <code>fenced_with_language</code> and <code>tangle</code>.</p>
 
 <div class="codeblock"><span class="codeblock_name">{<strong>global definitions</strong>}</span>
 
 <pre class="prettyprint language-python">
-parser = argparse.ArgumentParser()
 file = ""
 
 fenced_with_language = False
 many_outpus = False
+tangle = False
 </pre></div>
 
 
@@ -237,7 +267,7 @@ if not reading_code_chunk:
 </pre></div>
 
 
-<p>The chunk name is a stripped substring of the opening fence. If blocks
+<p>The chunk name is a stripped substring of the opening fence. If chunks
 do not have a language specification, then the chunk name is the
 (space-stripped) substring of line which goes from the last backtick
 of the fence until the end of the line; otherwise, it goes from the
@@ -525,9 +555,10 @@ for line_number, line in enumerate(input_file):
 </pre></div>
 
 
-<p>When entering a code block we wrap it in a div, precede it by a
-span declaring the code block, and replace the named fence by a simple
-fence (no names); when leaving the fenced block we close the div tag.</p>
+<p>Each chunk will be wrapped in a <code>div</code>, and preceded by a <code>span</code>
+declaring the chunk name, and replace the fences by open and close
+<code>pre</code> tags; besides, when leaving the fenced block, we close the <code>div</code>
+tag.</p>
 
 <div class="codeblock"><span class="codeblock_name">{<strong>print line if not in code chunk; process code chunk fence</strong>}</span>
 
