@@ -80,16 +80,24 @@ and file `foo-bar-2` contains the lines
 
 ## Todo
 
+- Features
+  - [ ] allow references to chunks from the text
+  - [ ] chunk cross-references
+  - [ ] variable cross-references (see next item)
+  - [ ] Language weaving backend (incorporate markdown parser, be smart about which language is used)
 - Warnings
+  - [ ] chunk without name
   - [ ] file ends before code chunk does
   - [ ] circular chunk dependencies
   - [ ] multiple root files are found (only generate multiple output
     files if a flag is set)
-- Flags
-  - [ ] generate a file for each root chunk
+- Flags/arguments
+  - [ ] generate a file for each root chunk/ no output if more than one root
   - [ ] flag for dry-run (just warnigs, no output)
-  - [ ] generate file with expansion of chunk (let user specify filename)
-- [ ] weave!
+  - [ ] generate file with expansion of given chunk (let user specify filename)
+- weave
+  - [ ] optionally specify language for all fenced blocks
+
 
 ## Nice to have
 
@@ -98,6 +106,9 @@ and file `foo-bar-2` contains the lines
 ## Known bugs
 
 Please let us know!
+
+- [ ] code chunks in code. e.g.: `@{x}` on a line of its own in code chunk
+- [ ] html tags in code chunks e.g., `</pre>` inside of code chunk
 
 ## Thanks
 
