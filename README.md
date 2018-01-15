@@ -19,7 +19,9 @@ each code chunk is named (their name appears after the fence, on the same line)
 fences may have three or more backticks, 
 (so long as open- and close-fence have the same number of them).
 Write `@{fla fli flow}` on a line of its own to refer to chunk
-named `fla fli flow`. 
+named `fla fli flow`.
+
+An example.
 
     This line is text. It is just ignored.
     More text, ignored as well.
@@ -27,6 +29,10 @@ named `fla fli flow`.
     - and this is, too;
     - so is this;
     - getting bored now.
+    
+    The fenced block below is a **code chunk**. Most lines reference
+    other chunks, whose text is to be inserted in the place where the
+    reference lies.
 
     ``` foo-bar
     @{two}
@@ -57,9 +63,7 @@ named `fla fli flow`.
     Another file.
     ```
     
-When tangled, generates two files. 
-
-File `foo-bar` contains the lines
+Tangling the above generates two files. File `foo-bar` contains the lines
 
     --2--
         --3--
@@ -73,10 +77,11 @@ File `foo-bar` contains the lines
     --1--
     --1-- ends here
         
-and file `foo-bar-2` contains the lines
+and file `foo-bar-2` contains the line
 
     Another file.
 
+For help and options run `python3 visconde.py -h`.
 
 ## Todo
 
