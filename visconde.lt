@@ -58,7 +58,7 @@ Where `OPTIONS` can be one or more of the following.
 All flags appear in pairs.
 
 
-``` python build  argument parser
+``` python build argument parser
 # file =================================================================
 parser.add_argument("file", help="literate source file")
 
@@ -261,6 +261,8 @@ else:
 
 ``` python error: too many root chunks
 print('! error: too many root chunks')
+print('  -----  chunk list:')
+print(root_chunks)
 #todo: abort
 ```
 

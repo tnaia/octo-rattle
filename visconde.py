@@ -7,6 +7,7 @@ file = ""
 
 fenced_with_language = False
 many_outpus = False
+tangle = False
 fence_regexp = re.compile('```+')
 chunk = {}
 def chunks_of(code):
@@ -21,51 +22,52 @@ def chunk_line_name(line):
 def indent_code(indentation, code):
     return [' '*indentation + line for line in code]
 
+# file =================================================================
 parser.add_argument("file", help="literate source file")
 
 # fencedwithlanguage ===================================================
-parser.add_argument("--fencedwithlanguage", help="first word on opening fence is language; the rest is chunk name",
-                    action="store_true")
-parser.add_argument("--nofencedwithlanguage", help="text on opening fence is chunk name (default)",
-                    action="store_true")
+parser.add_argument(  "--fencedwithlanguage", action="store_true", 
+    help="first word on opening fence is language; the rest is chunk name")
+parser.add_argument("--nofencedwithlanguage", action="store_true", 
+    help="text on opening fence is chunk name (default)")
+
 # manyoutputs ==========================================================
-parser.add_argument("--manyoutputs", help="generate one output file per root chunk",
-                    action="store_true")
-parser.add_argument("--nomanyoutputs", help="generate one output file per root chunk (default)",
-                    action="store_true")
+parser.add_argument(         "--manyoutputs", action="store_true", 
+    help="generate one output file per root chunk")
+parser.add_argument(       "--nomanyoutputs", action="store_true", 
+    help="generate one output file per root chunk (default)")
+
 # tangle ===============================================================
-parser.add_argument("--tangle", help="produce tangled outputs (default)",
-                    action="store_true")
-parser.add_argument("--notangle", help="do not produce tangled outputs",
-                    action="store_true")
+parser.add_argument(              "--tangle", action="store_true", 
+    help="produce tangled outputs (default)")
+parser.add_argument(            "--notangle", action="store_true", 
+    help="do not produce tangled outputs")
 
-
+# ======================================================================
 args = parser.parse_args()
-
-# input file
+# input file ===========================================================
 file = args.file
 
-# flag (no)fencedwithlanguage
+# flag (no)fencedwithlanguage ==========================================
 if args.fencedwithlanguage and args.nofencedwithlanguage:
     print('! error: contradictory flags (fencedwithlanguage and nofencedwithlanguage)')
     #todo abort
 
 fenced_with_language = args.fencedwithlanguage
 
-# flag (no)manyoutputs
+# flag (no)manyoutputs =================================================
 if args.manyoutputs and args.nomanyoutputs:
     print('! error: contradictory flags (manyoutputs and nomanyoutputs)')
     #todo abort
 
 many_outpus = args.manyoutputs
 
-# flag (no)tangle
+# flag (no)tangle ======================================================
 if args.tangle and args.notangle:
     print('! error: contradictory flags (tangle and notangle)')
     #todo abort
 
 tangle = not args.notangle
-
 print(banner) # Hi!
 
 with open(file, 'r') as input_file:
@@ -124,6 +126,8 @@ root_chunks = [blk for blk, parents in used_at.items() if len(parents) == 0]
 
 if tangle and (not many_outpus) and (len(root_chunks) > 1):
     print('! error: too many root chunks')
+    print('  -----  chunk list:')
+    print(root_chunks)
     #todo: abort
 else:
     for blk in root_chunks:

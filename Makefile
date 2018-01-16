@@ -1,4 +1,4 @@
-PYTHON=python
+PYTHON=python3
 MARKDOWN=markdown -f fencedcode -f nostyle
 
 visconde.py: visconde.lt
