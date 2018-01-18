@@ -21,7 +21,7 @@ breaks).
 The line below should be updated whenever this program is changed.
 
 ``` python global definitions
-banner = "This is VISCONDE version 0.1.4."
+banner = "This is VISCONDE version 0.1.5."
 ```
 
 Here is the program outline.
@@ -444,7 +444,6 @@ with open(file, 'r') as input_file:
         @{weave source}
         @{output html tail}
     print("[ DONE ]")
-
 ```
 
 We provide a mechanism for inserting stuff before (header) and after
@@ -555,6 +554,18 @@ if match_fence and match_fence.end() == fence_length:
     reading_code_chunk = False
     last_line_blank = False
 else:
-    print(line, file=output_file, end='')
+    @{output weaved code line}
 ```
 
+
+The only syntax highlighting we do is for code chunk references.
+
+``` python output weaved code line
+if is_chunk_line(line):
+    j = 0
+    while line[j] != '@':
+        j +=1
+    line = ' '*j + '<' + 'code class="chunk_ref">@{' + chunk_line_name(line) + '}<' + '/code>\n'
+
+print(line, file=output_file, end='')
+```

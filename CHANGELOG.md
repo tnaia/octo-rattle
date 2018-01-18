@@ -1,5 +1,10 @@
 # Changes to visconde
 
+## v 0.1.5
+
+- Chunks numbered, with hyperlinked cross-references.
+- Highlight chunk references in code block.
+
 ## v 0.1.4
 
 - Create `CHANGELOG.md`

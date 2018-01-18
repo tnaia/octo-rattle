@@ -42,4 +42,8 @@
     .codeblock a {
         text-decoration: none
     }
+    code.chunk_ref {
+        background-color: peachpuff;
+        padding: 2pt
+    }
 }
