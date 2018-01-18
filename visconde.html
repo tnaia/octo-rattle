@@ -3,30 +3,7 @@
 <head>
 <meta charset="utf-8">
 <title>Visconde</title>
-<style media="screen" type="text/css">
-body 
-.codeblock_name {
-  background-color: lightgreen;
-  padding: 2pt;
-  display: block;
-  margin: 0pt;
-  font-family: monospace;
-}
-pre {
-  background-color: papayawhip;
-  margin-top: 0;
-  padding: 5pt 2pt;
-}
-p code, li code {
-  background-color: papayawhip;
-  padding: 2pt
-}
-body {
-  width: 40em;
-  margin: auto;
-  background-color: snow
-}
-</style>
+<link href="visconde.css" type="text/css" rel="stylesheet">
 </head><body>
 <h1>Basic literate tool in python</h1>
 
@@ -37,34 +14,40 @@ of the CWEB program of <a href="https://cs.stanford.edu/~knuth/lp.html">Knuth an
 Our syntax follows that of <a href="https://github.com/zyedidia/Literate/">Literate</a>.
 We only implement a subset of these programs' functionality.</p>
 
+<p>(A manual of visconde can  be found on the project&rsquo;s <a href="https://github.com/tnaia/visconde/">Github
+repository</a>.)</p>
+
 <p>More precisely, this program is a minimal &ldquo;tangler/weaver&rdquo; which
 operates on a single input file, under the restriction that any chunk
 reference, (say, <code>@{chunk name}</code>) lies on a line of its own (this
-means, in particular, no comments are allowed in a line that
-references a chunk, and a chunk name cannot contain line breaks).</p>
-
-<p>Here is the program outline.</p>
-
-<div class="codeblock"><span class="codeblock_name">{<strong>visconde.py</strong>}</span>
-
-<pre class="prettyprint language-python">
-@{imports}
-
-@{global definitions}
-
-@{parse arguments}
-@{process input file}
-@{output tangled sources}
-@{output weaved file}
-</pre></div>
-
+means, in particular, that not even comments are allowed in a line
+that references a chunk; a chunk name also cannot contain line
+breaks).</p>
 
 <p>The line below should be updated whenever this program is changed.</p>
 
-<div class="codeblock"><span class="codeblock_name">{<strong>global definitions</strong>}</span>
+<div class="codeblock"><span class="codeblock_name"><a id="1">1</a> {<strong>global definitions</strong> <a href="#5">5</a>, <a href="#8">8</a>, <a href="#9">9</a>, <a href="#10">10</a>, <a href="#12">12</a>, <a href="#17">17</a>, <a href="#22">22</a>, <a href="#27">27</a>}</span>
 
 <pre class="prettyprint language-python">
 banner = "This is VISCONDE version 0.1.4."
+</pre><span class="usedin">Used in <a href="#2">2</a>.</span></div>
+
+
+<p>Here is the program outline.</p>
+
+<div class="codeblock"><span class="codeblock_name"><a id="2">2</a> {<strong>visconde.py</strong>}</span>
+
+<pre class="prettyprint language-python">
+@{imports}
+@{global definitions}
+
+@{parse arguments}
+
+print(banner) # Hi!
+
+@{process input file}
+@{output tangled sources}
+@{output weaved file}
 </pre></div>
 
 
@@ -86,20 +69,21 @@ call to <code>visconde</code> would look like this</p>
 <li><code>--nomanyoutputs</code> error (and no output files) if more than one root chunk</li>
 <li><code>--tangle</code> produce tangled outputs (default)</li>
 <li><code>--notangle</code> do not produce tangled outputs</li>
+<li><code>--markdownsections</code> use markdown headings (lines starting by up to six <code>#</code> characters) as section divisions (default, and currently only option)</li>
 </ul>
 
 
-<div class="codeblock"><span class="codeblock_name">{<strong>parse arguments</strong>}</span>
+<div class="codeblock"><span class="codeblock_name"><a id="3">3</a> {<strong>parse arguments</strong>}</span>
 
 <pre class="prettyprint language-python">
 @{build argument parser}
 @{set flags}
-</pre></div>
+</pre><span class="usedin">Used in <a href="#2">2</a>.</span></div>
 
 
 <p>All flags appear in pairs.</p>
 
-<div class="codeblock"><span class="codeblock_name">{<strong>build argument parser</strong>}</span>
+<div class="codeblock"><span class="codeblock_name"><a id="4">4</a> {<strong>build argument parser</strong>}</span>
 
 <pre class="prettyprint language-python">
 # file =================================================================
@@ -125,31 +109,31 @@ parser.add_argument(            "--notangle", action="store_true",
 
 # ======================================================================
 args = parser.parse_args()
-</pre></div>
+</pre><span class="usedin">Used in <a href="#3">3</a>.</span></div>
 
 
 
 
-<div class="codeblock"><span class="codeblock_name">{<strong>global definitions</strong>}</span>
+<div class="codeblock"><span class="codeblock_name"><a id="5">5</a> {<strong>global definitions</strong> <a href="#1">1</a>, <a href="#8">8</a>, <a href="#9">9</a>, <a href="#10">10</a>, <a href="#12">12</a>, <a href="#17">17</a>, <a href="#22">22</a>, <a href="#27">27</a>}</span>
 
 <pre class="prettyprint language-python">
 parser = argparse.ArgumentParser()
-</pre></div>
+</pre><span class="usedin">Used in <a href="#2">2</a>.</span></div>
 
 
 
 
-<div class="codeblock"><span class="codeblock_name">{<strong>imports</strong>}</span>
+<div class="codeblock"><span class="codeblock_name"><a id="6">6</a> {<strong>imports</strong> <a href="#13">13</a>}</span>
 
 <pre class="prettyprint language-python">
 import argparse
-</pre></div>
+</pre><span class="usedin">Used in <a href="#2">2</a>.</span></div>
 
 
 <p>It is time to enforce the default behaviour for each pair of flags
 <code>--xxx</code>/<code>--noxxx</code>, and check for sanity.</p>
 
-<div class="codeblock"><span class="codeblock_name">{<strong>set flags</strong>}</span>
+<div class="codeblock"><span class="codeblock_name"><a id="7">7</a> {<strong>set flags</strong>}</span>
 
 <pre class="prettyprint language-python">
 # input file ===========================================================
@@ -175,13 +159,13 @@ if args.tangle and args.notangle:
     #todo abort
 
 tangle = not args.notangle
-</pre></div>
+</pre><span class="usedin">Used in <a href="#3">3</a>.</span></div>
 
 
 <p>The flags are available to the rest of the program via the global
 variables <code>file</code>, <code>fenced_with_language</code> and <code>tangle</code>.</p>
 
-<div class="codeblock"><span class="codeblock_name">{<strong>global definitions</strong>}</span>
+<div class="codeblock"><span class="codeblock_name"><a id="8">8</a> {<strong>global definitions</strong> <a href="#1">1</a>, <a href="#5">5</a>, <a href="#9">9</a>, <a href="#10">10</a>, <a href="#12">12</a>, <a href="#17">17</a>, <a href="#22">22</a>, <a href="#27">27</a>}</span>
 
 <pre class="prettyprint language-python">
 file = ""
@@ -189,63 +173,100 @@ file = ""
 fenced_with_language = False
 many_outpus = False
 tangle = False
-</pre></div>
+</pre><span class="usedin">Used in <a href="#2">2</a>.</span></div>
 
 
 <h2>Storing chunks</h2>
 
-<p>Each line of the input file is either text, a fence (between text and
-code), or part of a code chunk. In this first pass over the input
+<p>Visconde sees the input file as a series of lines which are either
+text (natural language prose), code (to be tangled) or a fence
+(boundary between the two). Each occurence of code surrounded by
+fences forms a <strong>block</strong> (or code block); the (ordered) collection of code
+blocks with same name forms a <strong>chunk</strong>.</p>
+
+<div class="codeblock"><span class="codeblock_name"><a id="9">9</a> {<strong>global definitions</strong> <a href="#1">1</a>, <a href="#5">5</a>, <a href="#8">8</a>, <a href="#10">10</a>, <a href="#12">12</a>, <a href="#17">17</a>, <a href="#22">22</a>, <a href="#27">27</a>}</span>
+
+<pre class="prettyprint language-python">
+class Chunk:
+    '''Collection of blocks with same name'''
+    
+    def __init__(self):
+        self.blocks = []
+</pre><span class="usedin">Used in <a href="#2">2</a>.</span></div>
+
+
+<p>Blocks are all numbered. Each block stores</p>
+
+<ul>
+<li>the line number (of the input file) of the first line of the block, and</li>
+<li>the lines of code in the block.</li>
+</ul>
+
+
+<div class="codeblock"><span class="codeblock_name"><a id="10">10</a> {<strong>global definitions</strong> <a href="#1">1</a>, <a href="#5">5</a>, <a href="#8">8</a>, <a href="#9">9</a>, <a href="#12">12</a>, <a href="#17">17</a>, <a href="#22">22</a>, <a href="#27">27</a>}</span>
+
+<pre class="prettyprint language-python">
+class Block:
+    '''Lines of a block of code.'''
+    block_counter = 0
+    
+    def __init__(self,line_number,block_lines):
+        self.start = line_number
+        self.lines = block_lines
+        Block.block_counter +=1
+        self.id = Block.block_counter
+</pre><span class="usedin">Used in <a href="#2">2</a>.</span></div>
+
+
+<p>In this first pass over the input
 file, we only care about the two latter cases.</p>
 
 <p>We read text lines until we reach a fence (start of a code chunk). Next we store
 the chunk name and accumulate the lines of the chunk in a list <code>chunk_text</code>,
 which is finally stored at the point when we reach the fence ending the chunk.</p>
 
-<div class="codeblock"><span class="codeblock_name">{<strong>process input file</strong>}</span>
+<div class="codeblock"><span class="codeblock_name"><a id="11">11</a> {<strong>process input file</strong>}</span>
 
 <pre class="prettyprint language-python">
-print(banner) # Hi!
-
 with open(file, 'r') as input_file:
     reading_code_chunk = False
     last_line_blank = False
     chunk_name = ''
-    chunk_text = [] # list of lines
+    block_lines = [] # list of lines
 
     for line_number, line in enumerate(input_file):
-        @{continue if not in code chunk; set `chunk_name` and `reading_code_chunk`}
+        @{continue if not in code block; set `chunk_name` and `reading_code_chunk`}
     
-        @{add line to `chunk_text` or complete and store chunk}
-</pre></div>
+        @{add line to `block_lines` or complete and store chunk}
+</pre><span class="usedin">Used in <a href="#2">2</a>.</span></div>
 
 
-<p>Every code chunk is preceeded by a blank line (i.e., a line with only whitespace).
+<p>Every code chunk is preceded by a blank line (i.e., a line with only white space).
 The first line of a code chunk begins with three or more backticks (<code>```</code>),
 followed by the chunk name. The last line of a code chunk contains only backticks,
 (as many as there were at the chunk&rsquo;s first line).</p>
 
-<div class="codeblock"><span class="codeblock_name">{<strong>global definitions</strong>}</span>
+<div class="codeblock"><span class="codeblock_name"><a id="12">12</a> {<strong>global definitions</strong> <a href="#1">1</a>, <a href="#5">5</a>, <a href="#8">8</a>, <a href="#9">9</a>, <a href="#10">10</a>, <a href="#17">17</a>, <a href="#22">22</a>, <a href="#27">27</a>}</span>
 
 <pre class="prettyprint language-python">
 fence_regexp = re.compile('```+')
-</pre></div>
+</pre><span class="usedin">Used in <a href="#2">2</a>.</span></div>
 
 
 
 
-<div class="codeblock"><span class="codeblock_name">{<strong>imports</strong>}</span>
+<div class="codeblock"><span class="codeblock_name"><a id="13">13</a> {<strong>imports</strong> <a href="#6">6</a>}</span>
 
 <pre class="prettyprint language-python">
 import re
-</pre></div>
+</pre><span class="usedin">Used in <a href="#2">2</a>.</span></div>
 
 
 <p>Note that if <code>reading_code_chunk</code> is <code>False</code>, then we will eventually
 reach a <code>continue</code> instruction; and, hence, <code>@{add line to
-`chunk_text`...}</code> is only reached when <code>reading_code_chunk == True</code>.</p>
+`block_lines`...}</code> is only reached when <code>reading_code_chunk == True</code>.</p>
 
-<div class="codeblock"><span class="codeblock_name">{<strong>continue if not in code chunk; set `chunk_name` and `reading_code_chunk`</strong>}</span>
+<div class="codeblock"><span class="codeblock_name"><a id="14">14</a> {<strong>continue if not in code block; set `chunk_name` and `reading_code_chunk`</strong>}</span>
 
 <pre class="prettyprint language-python">
 if not reading_code_chunk:
@@ -256,15 +277,15 @@ if not reading_code_chunk:
         match_fence = fence_regexp.match(line)
         if match_fence:
             fence_length = match_fence.end()
-            @{store chunk name}
+            @{set `chunk_name`}
             chunk_line = line_number
-            chunk_text = []
+            block_lines = []
             reading_code_chunk = True
         else:
             last_line_blank = False
 
     continue
-</pre></div>
+</pre><span class="usedin">Used in <a href="#11">11</a>.</span></div>
 
 
 <p>The chunk name is a stripped substring of the opening fence. If chunks
@@ -275,7 +296,7 @@ first space character and goes until the end of the line (we do this
 so that the fence can be followed immediately by a language
 specification).</p>
 
-<div class="codeblock"><span class="codeblock_name">{<strong>store chunk name</strong>}</span>
+<div class="codeblock"><span class="codeblock_name"><a id="15">15</a> {<strong>set `chunk_name`</strong>}</span>
 
 <pre class="prettyprint language-python">
 j = fence_length
@@ -285,36 +306,34 @@ if fenced_with_language:
     while line[j] != ' ':
         j += 1
 chunk_name = line[j+1:].strip()
-</pre></div>
+</pre><span class="usedin">Used in <a href="#14">14</a>.</span></div>
 
 
-<p>We store the code of chunk named <code>chunk_name</code> in the dictionary <code>chunk</code>.
-Each dictionary entry is a list of tuples <code>(line_num, code)</code> containing
-- the line number of the first line of the chunk, and
-- the code in the chunk.</p>
+<p>We store the code block of chunk named <code>chunk_name</code> in the dictionary <code>chunk</code>.
+Each dictionary entry is a chunk object, containing a list of the code blocks of the same name.</p>
 
-<div class="codeblock"><span class="codeblock_name">{<strong>add line to `chunk_text` or complete and store chunk</strong>}</span>
+<div class="codeblock"><span class="codeblock_name"><a id="16">16</a> {<strong>add line to `block_lines` or complete and store chunk</strong>}</span>
 
 <pre class="prettyprint language-python">
 match_fence = fence_regexp.match(line)
 if match_fence and match_fence.end() == fence_length:
     if chunk_name not in chunk:
-        chunk[chunk_name] = []
-    chunk[chunk_name] += [(chunk_line+1, chunk_text)]
+        chunk[chunk_name] = Chunk()
+    chunk[chunk_name].blocks += [Block(chunk_line+1, block_lines)]
     reading_code_chunk = False
     last_line_blank = False
 else:
-    chunk_text += [line]
-</pre></div>
+    block_lines += [line]
+</pre><span class="usedin">Used in <a href="#11">11</a>.</span></div>
 
 
 
 
-<div class="codeblock"><span class="codeblock_name">{<strong>global definitions</strong>}</span>
+<div class="codeblock"><span class="codeblock_name"><a id="17">17</a> {<strong>global definitions</strong> <a href="#1">1</a>, <a href="#5">5</a>, <a href="#8">8</a>, <a href="#9">9</a>, <a href="#10">10</a>, <a href="#12">12</a>, <a href="#22">22</a>, <a href="#27">27</a>}</span>
 
 <pre class="prettyprint language-python">
 chunk = {}
-</pre></div>
+</pre><span class="usedin">Used in <a href="#2">2</a>.</span></div>
 
 
 <h2>From chunks to files</h2>
@@ -333,7 +352,7 @@ will be replaced (recursively) by the correct content
 <p>The first step is to identify which chunks are to become
 files&mdash;we call these <em>root chunks</em>.</p>
 
-<div class="codeblock"><span class="codeblock_name">{<strong>output tangled sources</strong>}</span>
+<div class="codeblock"><span class="codeblock_name"><a id="18">18</a> {<strong>output tangled sources</strong>}</span>
 
 <pre class="prettyprint language-python">
 @{build list of `root_chunks`}
@@ -343,27 +362,34 @@ if tangle and (not many_outpus) and (len(root_chunks) > 1):
 else:
     for blk in root_chunks:
         @{write `blk` to a file}
-</pre></div>
+</pre><span class="usedin">Used in <a href="#2">2</a>.</span></div>
 
 
 
 
-<div class="codeblock"><span class="codeblock_name">{<strong>error: too many root chunks</strong>}</span>
+<div class="codeblock"><span class="codeblock_name"><a id="19">19</a> {<strong>error: too many root chunks</strong>}</span>
 
 <pre class="prettyprint language-python">
 print('! error: too many root chunks')
 print('  -----  chunk list:')
 print(root_chunks)
 #todo: abort
-</pre></div>
+</pre><span class="usedin">Used in <a href="#18">18</a>.</span></div>
 
 
-<p>The dictionary <code>used_at</code> stores a list of chunks which refer
-to any given chunk, e.g.: <code>used_at['global defintions']</code> is
-a list of each <code>chunk_name</code> containing <code>@{global definitions}</code>
-in its text.</p>
+<p>The dictionary <code>used_at</code> stores a list of chunks which refer to any
+given chunk, e.g.: <code>used_at['global definitions']</code> is a list of each
+<code>chunk_name</code> containing <code>@{global definitions}</code> in its text (but read
+on).</p>
 
-<div class="codeblock"><span class="codeblock_name">{<strong>build list of `root_chunks`</strong>}</span>
+<p>Well, actually, things are slightly more complicated: rather than a
+list of chunk names, we actually store a list of pairs: an integer and
+the chunk name. Recall that each chunk name is (potentially) related
+to a series of code chunks; the integer is the index of the code
+chunk. We shall use this in section <code>@{}</code>, to link each chunk to the
+chunks where it is used.</p>
+
+<div class="codeblock"><span class="codeblock_name"><a id="20">20</a> {<strong>build list of `root_chunks`</strong>}</span>
 
 <pre class="prettyprint language-python">
 used_at = dict()
@@ -371,16 +397,32 @@ used_at = dict()
 for blk in chunk:
     if blk not in used_at:
         used_at[blk] = []
-    for l,b in chunk[blk]:
-        for chk in chunks_of(b):
+    for i,b in enumerate(chunk[blk].blocks):
+        for chk in chunks_of(b.lines):
             if chk not in used_at:
-                used_at[chk] = [blk]
+                used_at[chk]  = [(blk, b.id, i)]
             else:
-                used_at[chk] += [blk]
+                used_at[chk] += [(blk, b.id, i)]
 
-
+#print(used_at)
 root_chunks = [blk for blk, parents in used_at.items() if len(parents) == 0]
-</pre></div>
+@{list root chunks}
+</pre><span class="usedin">Used in <a href="#18">18</a>.</span></div>
+
+
+
+
+<div class="codeblock"><span class="codeblock_name"><a id="21">21</a> {<strong>list root chunks</strong>}</span>
+
+<pre class="prettyprint language-python">
+if len(root_chunks) == 1:
+    print("root chunk: '" + root_chunks[0] + "'")
+elif len(root_chunks) > 1:
+    print('root chunks: ' + ', '.join(["'" + c + "'" for c in root_chunks]))
+else:
+    print('! warning: I cannot find any  root chunk')
+    #todo: it's alright if no tangle option was chosen
+</pre><span class="usedin">Used in <a href="#20">20</a>.</span></div>
 
 
 <p>We need to strip spaces surrounding chunk references, as well as
@@ -391,16 +433,16 @@ instance, <code>␣␣@{␣␣␣global␣definitions␣␣}␣␣</code>) we pr
 <ol>
 <li>strip leading and trailing spaces (yields <code>@{␣␣␣global␣definitions␣␣}</code>),</li>
 <li>remove <code>@{</code> and <code>}</code> (yields <code>␣␣␣global␣definitions␣␣</code>),</li>
-<li>strip spaces again (yields <code>global␣defintions</code>).</li>
+<li>strip spaces again (yields <code>global␣definitions</code>).</li>
 </ol>
 
 
-<div class="codeblock"><span class="codeblock_name">{<strong>global definitions</strong>}</span>
+<div class="codeblock"><span class="codeblock_name"><a id="22">22</a> {<strong>global definitions</strong> <a href="#1">1</a>, <a href="#5">5</a>, <a href="#8">8</a>, <a href="#9">9</a>, <a href="#10">10</a>, <a href="#12">12</a>, <a href="#17">17</a>, <a href="#27">27</a>}</span>
 
 <pre class="prettyprint language-python">
 def chunks_of(code):
     return [line.strip()[2:-1].strip() for line in code if is_chunk_line(line)]
-</pre></div>
+</pre><span class="usedin">Used in <a href="#2">2</a>.</span></div>
 
 
 <p>We finally handle writing each root chunk to a file.
@@ -413,29 +455,29 @@ occurs when <code>buffer[i]</code> is a chunk reference. In this case we replace
 <p>If we find a reference to chunk <code>c</code>, but <code>chunk[c]</code> is undefined, we
 consider <code>chunk[c]</code> the reference, verbatim; we also issue a warning.</p>
 
-<div class="codeblock"><span class="codeblock_name">{<strong>write `blk` to a file</strong>}</span>
+<div class="codeblock"><span class="codeblock_name"><a id="23">23</a> {<strong>write `blk` to a file</strong>}</span>
 
 <pre class="prettyprint language-python">
-print("Writing file %s... " % blk,end='')
+print("Writing file %s...    " % blk,end='')
 with open(blk, 'w') as output:
-    buffer = [l for c in chunk[blk] for l in c[1]]
+    buffer = [l for b in chunk[blk].blocks for l in b.lines]
     i = 0
     while i < len(buffer):
         @{output tangled line}
         
 print("[ DONE ]")
-</pre></div>
+</pre><span class="usedin">Used in <a href="#18">18</a>.</span></div>
 
 
 <p>Lines are either output verbatim or (if line is a valid chunk reference)
 replaced by the corresponding chunk contents.</p>
 
-<div class="codeblock"><span class="codeblock_name">{<strong>output tangled line</strong>}</span>
+<div class="codeblock"><span class="codeblock_name"><a id="24">24</a> {<strong>output tangled line</strong>}</span>
 
 <pre class="prettyprint language-python">
 if is_chunk_line(buffer[i]):
-    the_chunk_name = chunk_line_name(buffer[i])
-    if the_chunk_name not in chunk:
+    chunk_name = chunk_line_name(buffer[i])
+    if chunk_name not in chunk:
         @{warn of undefined chunk}
 
         print(buffer[i], file=output, end='') # insert reference verbatim
@@ -445,7 +487,7 @@ if is_chunk_line(buffer[i]):
 else:
     print(buffer[i], file=output, end='')
     i += 1
-</pre></div>
+</pre><span class="usedin">Used in <a href="#23">23</a>.</span></div>
 
 
 <p>We preserve the number of spaces before a reference, adding it as a
@@ -453,28 +495,28 @@ prefix to each line when inserting the contents of a chunk. (The way
 we insert lines to buffer is wasteful because slicing <code>buffer</code> creates
 a (shallow) copy of the sliced portion.)</p>
 
-<div class="codeblock"><span class="codeblock_name">{<strong>add contents of chunk to buffer</strong>}</span>
+<div class="codeblock"><span class="codeblock_name"><a id="25">25</a> {<strong>add contents of chunk to buffer</strong>}</span>
 
 <pre class="prettyprint language-python">
-indentation = re.compile(' *').match(buffer[i]).end()
-indented_lines = [x for l,c in  chunk[the_chunk_name] for x in indent_code(indentation, c)]
-buffer = indented_lines + buffer[i+1:]
+indent = re.compile(' *').match(buffer[i]).end()
+ind_lns = [x for b in chunk[chunk_name].blocks for x in add_indent(indent, b.lines)]
+buffer = ind_lns + buffer[i+1:]
 i = 0
-</pre></div>
+</pre><span class="usedin">Used in <a href="#24">24</a>.</span></div>
 
 
 
 
-<div class="codeblock"><span class="codeblock_name">{<strong>warn of undefined chunk</strong>}</span>
+<div class="codeblock"><span class="codeblock_name"><a id="26">26</a> {<strong>warn of undefined chunk</strong>}</span>
 
 <pre class="prettyprint language-python">
-print("! warning: undefined chunk; reference will be kept verbatim: %s" % the_chunk_name)
-</pre></div>
+print("! warning: undefined chunk; reference will be kept verbatim: %s" % chunk_name)
+</pre><span class="usedin">Used in <a href="#24">24</a>.</span></div>
 
 
 
 
-<div class="codeblock"><span class="codeblock_name">{<strong>global definitions</strong>}</span>
+<div class="codeblock"><span class="codeblock_name"><a id="27">27</a> {<strong>global definitions</strong> <a href="#1">1</a>, <a href="#5">5</a>, <a href="#8">8</a>, <a href="#9">9</a>, <a href="#10">10</a>, <a href="#12">12</a>, <a href="#17">17</a>, <a href="#22">22</a>}</span>
 
 <pre class="prettyprint language-python">
 def is_chunk_line(l):
@@ -484,9 +526,9 @@ def is_chunk_line(l):
 def chunk_line_name(line):
     return line.strip()[2:-1].strip()
 
-def indent_code(indentation, code):
-    return [' '*indentation + line for line in code]
-</pre></div>
+def add_indent(indent_amount, code):
+    return [' '*indent_amount + line for line in code]
+</pre><span class="usedin">Used in <a href="#2">2</a>.</span></div>
 
 
 <h2>Weaving, hacked</h2>
@@ -503,7 +545,7 @@ preceding the code chunk).</li>
 </ol>
 
 
-<div class="codeblock"><span class="codeblock_name">{<strong>output weaved file</strong>}</span>
+<div class="codeblock"><span class="codeblock_name"><a id="28">28</a> {<strong>output weaved file</strong>}</span>
 
 <pre class="prettyprint language-python">
 with open(file, 'r') as input_file:
@@ -515,54 +557,60 @@ with open(file, 'r') as input_file:
         @{output html tail}
     print("[ DONE ]")
 
-</pre></div>
+</pre><span class="usedin">Used in <a href="#2">2</a>.</span></div>
 
 
 <p>We provide a mechanism for inserting stuff before (header) and after
 (tail) the weaved output.</p>
 
-<div class="codeblock"><span class="codeblock_name">{<strong>output html header</strong>}</span>
+<div class="codeblock"><span class="codeblock_name"><a id="29">29</a> {<strong>output html header</strong>}</span>
 
 <pre class="prettyprint language-python">
 html_header = ''
 
 print(html_header, file=output_file, end='\n')
-</pre></div>
+</pre><span class="usedin">Used in <a href="#28">28</a>.</span></div>
 
 
 
 
-<div class="codeblock"><span class="codeblock_name">{<strong>output html tail</strong>}</span>
+<div class="codeblock"><span class="codeblock_name"><a id="30">30</a> {<strong>output html tail</strong>}</span>
 
 <pre class="prettyprint language-python">
 html_tail = ''
 print(html_tail, file=output_file, end='')
-</pre></div>
+</pre><span class="usedin">Used in <a href="#28">28</a>.</span></div>
 
 
 <p>Weaving the source code is <strong>mostly</strong> echoing lines, keeping track of
-whether we are in a code chunk (fenced code) or not.</p>
+whether we are in a code chunk (fenced code) or not. We also maintain
+a code block counter.</p>
 
-<div class="codeblock"><span class="codeblock_name">{<strong>weave source</strong>}</span>
+<p>After each code chunk we print a (hyperlinked) list of the chunks it
+has been used at.</p>
+
+<div class="codeblock"><span class="codeblock_name"><a id="31">31</a> {<strong>weave source</strong>}</span>
 
 <pre class="prettyprint language-python">
 reading_code_chunk = False
 last_line_blank = False
 chunk_name = ''
+code_block_counter = 0
 
 for line_number, line in enumerate(input_file):
     @{print line if not in code chunk; process code chunk fence}
     @{echo code text and add closing div after closing fence}
 
-</pre></div>
+</pre><span class="usedin">Used in <a href="#28">28</a>.</span></div>
 
 
-<p>Each chunk will be wrapped in a <code>div</code>, and preceded by a <code>span</code>
-declaring the chunk name, and replace the fences by open and close
-<code>pre</code> tags; besides, when leaving the fenced block, we close the <code>div</code>
-tag.</p>
+<p>Each chunk will be wrapped in a <code>div</code>; it will be preceded by a <code>span</code>
+declaring the chunk name; the fences will be replaced by open and
+close <code>pre</code> tags; finally, we add a span element containing the parent
+chunks (i.e., chunks containing references to this one) and a closing
+<code>div</code> tag.</p>
 
-<div class="codeblock"><span class="codeblock_name">{<strong>print line if not in code chunk; process code chunk fence</strong>}</span>
+<div class="codeblock"><span class="codeblock_name"><a id="32">32</a> {<strong>print line if not in code chunk; process code chunk fence</strong>}</span>
 
 <pre class="prettyprint language-python">
 if not reading_code_chunk:
@@ -574,9 +622,11 @@ if not reading_code_chunk:
         match_fence = fence_regexp.match(line)
         if match_fence:
             fence_length = match_fence.end()
+            code_block_counter += 1
             @{assemble `code_chunk_header`}
             print(code_chunk_header, file=output_file)
             reading_code_chunk = True
+
         else:
             print(line,file=output_file, end='')
             last_line_blank = False
@@ -584,12 +634,14 @@ if not reading_code_chunk:
         print(line, file=output_file, end='')
 
     continue
-</pre></div>
+</pre><span class="usedin">Used in <a href="#31">31</a>.</span></div>
 
 
+<p>When we find a code chunk, we set <code>chunk_name</code> for use at the end of
+the code block. This is similar to <code>@{set</code>chunk_name}`, but we set
+the language of the block as well.</p>
 
-
-<div class="codeblock"><span class="codeblock_name">{<strong>assemble `code_chunk_header`</strong>}</span>
+<div class="codeblock"><span class="codeblock_name"><a id="33">33</a> {<strong>assemble `code_chunk_header`</strong>}</span>
 
 <pre class="prettyprint language-python">
 if fenced_with_language:
@@ -599,28 +651,49 @@ if fenced_with_language:
     chunk_lang_begin = j
     while line[j] != ' ':
         j += 1
-    chunk_language = line[chunk_lang_begin:j]
     chunk_name = line[j+1:].strip()
-    code_chunk_header = '<' +'div class="codeblock"><'+'span class="codeblock_name">{<'+'strong>' + chunk_name + '<'+'/strong>}<'+'/span>\n\n<'+'pre class="prettyprint language-' + chunk_language +'">'
+    chunk_id = code_block_counter
+    chunk_language = line[chunk_lang_begin:j]
+
+    @{set `other_blocks` as hyperlinked references to all blocks with the same name}
+    code_chunk_header = '<' +'div class="codeblock"><'+ 'span class="codeblock_name"><'+('a id="%d">%d<' % (chunk_id,chunk_id))+'/a> {<'+'strong>' + chunk_name + '<'+'/strong>' + other_blocks + '}<'+'/span>\n\n<'+'pre class="prettyprint language-' + chunk_language +'">'
 else:
     chunk_name = line[fence_length:].strip()
     code_chunk_header = '<' +'div class="codeblock"><'+'span class="codeblock_name">{<'+'strong>' + chunk_name + '<'+'/strong>}<'+'/span>\n\n<'+'pre class="prettyprint">'
-</pre></div>
+</pre><span class="usedin">Used in <a href="#32">32</a>.</span></div>
 
 
 
 
-<div class="codeblock"><span class="codeblock_name">{<strong>echo code text and add closing div after closing fence</strong>}</span>
+<div class="codeblock"><span class="codeblock_name"><a id="34">34</a> {<strong>set `other_blocks` as hyperlinked references to all blocks with the same name</strong>}</span>
+
+<pre class="prettyprint language-python">
+other_blocks = ', '.join([('<'+ 'a href="#%d">%d<' + '/a>') % (b.id,b.id) for b in chunk[chunk_name].blocks if b.id != chunk_id])
+if other_blocks != '':
+    other_blocks = ' ' + other_blocks
+</pre><span class="usedin">Used in <a href="#33">33</a>.</span></div>
+
+
+
+
+<div class="codeblock"><span class="codeblock_name"><a id="35">35</a> {<strong>echo code text and add closing div after closing fence</strong>}</span>
 
 <pre class="prettyprint language-python">
 match_fence = fence_regexp.match(line)
 if match_fence and match_fence.end() == fence_length:
-    print('<'+'/p'+'re><'+'/div>', file=output_file)
+    seealso = ''
+    if len(used_at[chunk_name]) > 0:
+        seealso = '<' + 'span class="usedin">Used in ' + ', '.join([(('<' + 'a href="#%d">%d<' +'/a>') % (id,id)) for c,id,i in used_at[chunk_name]]) + '.<' + '/span>'
+
+    
+    print('<'+'/p'+'re>' + seealso +'<'+'/div>', file=output_file)
+
+
     reading_code_chunk = False
     last_line_blank = False
 else:
     print(line, file=output_file, end='')
-</pre></div>
+</pre><span class="usedin">Used in <a href="#31">31</a>.</span></div>
 
 
 

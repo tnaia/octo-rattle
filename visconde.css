@@ -1,0 +1,45 @@
+@media  screen {
+    html {
+        font-size: 2rem
+    }
+    body 
+    .codeblock_name {
+        background-color: lightgreen;
+        padding: 4pt;
+        display: block;
+        margin: 0pt;
+        font-family: monospace;
+        font-size: 90%
+    }
+    div.codeblock{
+        margin-bottom: 50pt
+    }
+    pre {
+        background-color: papayawhip;
+        margin-top: 0;
+        margin-bottom:0;
+        padding: 4pt;
+        font-size: 90%
+    }
+    p code, li code {
+        background-color: papayawhip;
+        padding: 4pt;
+        font-size: 90%
+    }
+    body {
+        width: 40em;
+        margin: auto;
+        background-color: snow
+    }
+    span.usedin {
+        display: block;
+        font-size: 90%;
+        font-family: monospace;
+        background-color: lightgreen;
+        padding: 2pt;
+        margin: 0pt;
+    }
+    .codeblock a {
+        text-decoration: none
+    }
+}
