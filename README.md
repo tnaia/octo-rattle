@@ -87,28 +87,31 @@ For help and options run `python3 visconde.py -h`.
 
 - Features
   - [ ] allow references to chunks from the text
-  - [ ] chunk cross-references
-  - [ ] variable cross-references (see next item)
-  - [ ] Language weaving backend (incorporate markdown parser, be smart about which language is used)
+  - [x] chunk cross-references
+  - [x] basic weave (assumes input is [GFM](https://help.github.com/articles/about-writing-and-formatting-on-github/) outputs markdown plus some html tags)
+  - [x] weave: dumb word index (see next item)
+  - [x] process fenced blocks having a language spec on the open-fence line (not default action, but controllable by command line option)
   - [ ] identify first appearance of word/identifier
+  - [ ] better weaving backend (incorporate markdown parser, be smart about which language is used)
   - [ ] section-awareness (e.g: table of contents word index also over code in text sections
+  - [ ] option to set language for all fenced blocks
+
 - Warnings
   - [ ] chunk without name
   - [ ] file ends before code chunk does
   - [ ] circular chunk dependencies
-  - [ ] multiple root files are found (only generate multiple output
+  - [x] generate a file for each root chunk
+  - [x] if multiple root files are found, only generate multiple output
         files if a flag is set)
   - [ ] warn if distinct blocks of same code chunk have different languages
 - Flags/arguments
-  - [ ] generate a file for each root chunk/ no output if more than one root
-  - [ ] flag for dry-run (just warnigs, no output)
+  - [ ] flag for dry-run (just warnings, no output)
   - [ ] generate file with expansion of given chunk (let user specify filename)
 - weave
-  - [ ] optionally specify language for all fenced blocks
 
 ## Nice to have
 
-- [ ] changefiles?
+- [x] changefile!
 
 ## Known bugs
 
@@ -119,7 +122,7 @@ Please let us know!
 
 ## Thanks
 
-[Knuth](http://www-cs-faculty.stanford.edu/~knuth/), [Zachary Yedidia](https://github.com/zyedidia), [José Augusto](http://www.ime.usp.br/~jose/).
+[Knuth](http://www-cs-faculty.stanford.edu/~knuth/), [Zachary Yedidia](https://github.com/zyedidia), [José Augusto](http://www.ime.usp.br/~jose/), [Monteiro Lobato](https://en.wikipedia.org/wiki/Monteiro_Lobato).
 
 ## Apology
 
