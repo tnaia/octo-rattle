@@ -26,10 +26,10 @@ breaks).</p>
 
 <p>The line below should be updated whenever this program is changed.</p>
 
-<div class="codeblock"><span class="codeblock_name"><a id="1">1</a> {<strong>global definitions</strong> <a href="#5">5</a>, <a href="#8">8</a>, <a href="#9">9</a>, <a href="#10">10</a>, <a href="#12">12</a>, <a href="#17">17</a>, <a href="#22">22</a>, <a href="#27">27</a>}</span>
+<div class="codeblock"><span class="codeblock_name"><a id="1">1</a> {<strong>global definitions</strong> <a href="#5">5</a>, <a href="#8">8</a>, <a href="#9">9</a>, <a href="#10">10</a>, <a href="#12">12</a>, <a href="#17">17</a>, <a href="#22">22</a>, <a href="#27">27</a>, <a href="#37">37</a>}</span>
 
 <pre class="prettyprint language-python">
-banner = "This is VISCONDE version 0.1.5."
+banner = "This is VISCONDE version 0.1.6."
 </pre><span class="usedin">Used in <a href="#2">2</a>.</span></div>
 
 
@@ -70,6 +70,8 @@ call to <code>visconde</code> would look like this</p>
 <li><code>--tangle</code> produce tangled outputs (default)</li>
 <li><code>--notangle</code> do not produce tangled outputs</li>
 <li><code>--markdownsections</code> use markdown headings (lines starting by up to six <code>#</code> characters) as section divisions (default, and currently only option)</li>
+<li><code>--index</code> produce word index (default)</li>
+<li><code>--noindex</code> no word index</li>
 </ul>
 
 
@@ -107,6 +109,13 @@ parser.add_argument(              "--tangle", action="store_true",
 parser.add_argument(            "--notangle", action="store_true", 
     help="do not produce tangled outputs")
 
+# index ================================================================
+parser.add_argument(               "--index", action="store_true", 
+    help="produce word index (default)")
+parser.add_argument(             "--noindex", action="store_true", 
+    help="do not produce word index")
+
+
 # ======================================================================
 args = parser.parse_args()
 </pre><span class="usedin">Used in <a href="#3">3</a>.</span></div>
@@ -114,7 +123,7 @@ args = parser.parse_args()
 
 
 
-<div class="codeblock"><span class="codeblock_name"><a id="5">5</a> {<strong>global definitions</strong> <a href="#1">1</a>, <a href="#8">8</a>, <a href="#9">9</a>, <a href="#10">10</a>, <a href="#12">12</a>, <a href="#17">17</a>, <a href="#22">22</a>, <a href="#27">27</a>}</span>
+<div class="codeblock"><span class="codeblock_name"><a id="5">5</a> {<strong>global definitions</strong> <a href="#1">1</a>, <a href="#8">8</a>, <a href="#9">9</a>, <a href="#10">10</a>, <a href="#12">12</a>, <a href="#17">17</a>, <a href="#22">22</a>, <a href="#27">27</a>, <a href="#37">37</a>}</span>
 
 <pre class="prettyprint language-python">
 parser = argparse.ArgumentParser()
@@ -139,12 +148,14 @@ import argparse
 # input file ===========================================================
 file = args.file
 
+
 # flag (no)fencedwithlanguage ==========================================
 if args.fencedwithlanguage and args.nofencedwithlanguage:
     print('! error: contradictory flags (fencedwithlanguage and nofencedwithlanguage)')
     #todo abort
 
 fenced_with_language = args.fencedwithlanguage
+
 
 # flag (no)manyoutputs =================================================
 if args.manyoutputs and args.nomanyoutputs:
@@ -153,26 +164,36 @@ if args.manyoutputs and args.nomanyoutputs:
 
 many_outpus = args.manyoutputs
 
+
 # flag (no)tangle ======================================================
 if args.tangle and args.notangle:
     print('! error: contradictory flags (tangle and notangle)')
     #todo abort
 
 tangle = not args.notangle
+
+
+# flag (no)index =======================================================
+if args.index and args.noindex:
+    print('! error: contradictory flags (index and noindex)')
+    #todo abort
+
+index = not args.noindex
 </pre><span class="usedin">Used in <a href="#3">3</a>.</span></div>
 
 
 <p>The flags are available to the rest of the program via the global
 variables <code>file</code>, <code>fenced_with_language</code> and <code>tangle</code>.</p>
 
-<div class="codeblock"><span class="codeblock_name"><a id="8">8</a> {<strong>global definitions</strong> <a href="#1">1</a>, <a href="#5">5</a>, <a href="#9">9</a>, <a href="#10">10</a>, <a href="#12">12</a>, <a href="#17">17</a>, <a href="#22">22</a>, <a href="#27">27</a>}</span>
+<div class="codeblock"><span class="codeblock_name"><a id="8">8</a> {<strong>global definitions</strong> <a href="#1">1</a>, <a href="#5">5</a>, <a href="#9">9</a>, <a href="#10">10</a>, <a href="#12">12</a>, <a href="#17">17</a>, <a href="#22">22</a>, <a href="#27">27</a>, <a href="#37">37</a>}</span>
 
 <pre class="prettyprint language-python">
 file = ""
 
 fenced_with_language = False
 many_outpus = False
-tangle = False
+tangle = True
+index = True
 </pre><span class="usedin">Used in <a href="#2">2</a>.</span></div>
 
 
@@ -184,7 +205,7 @@ text (natural language prose), code (to be tangled) or a fence
 fences forms a <strong>block</strong> (or code block); the (ordered) collection of code
 blocks with same name forms a <strong>chunk</strong>.</p>
 
-<div class="codeblock"><span class="codeblock_name"><a id="9">9</a> {<strong>global definitions</strong> <a href="#1">1</a>, <a href="#5">5</a>, <a href="#8">8</a>, <a href="#10">10</a>, <a href="#12">12</a>, <a href="#17">17</a>, <a href="#22">22</a>, <a href="#27">27</a>}</span>
+<div class="codeblock"><span class="codeblock_name"><a id="9">9</a> {<strong>global definitions</strong> <a href="#1">1</a>, <a href="#5">5</a>, <a href="#8">8</a>, <a href="#10">10</a>, <a href="#12">12</a>, <a href="#17">17</a>, <a href="#22">22</a>, <a href="#27">27</a>, <a href="#37">37</a>}</span>
 
 <pre class="prettyprint language-python">
 class Chunk:
@@ -203,7 +224,7 @@ class Chunk:
 </ul>
 
 
-<div class="codeblock"><span class="codeblock_name"><a id="10">10</a> {<strong>global definitions</strong> <a href="#1">1</a>, <a href="#5">5</a>, <a href="#8">8</a>, <a href="#9">9</a>, <a href="#12">12</a>, <a href="#17">17</a>, <a href="#22">22</a>, <a href="#27">27</a>}</span>
+<div class="codeblock"><span class="codeblock_name"><a id="10">10</a> {<strong>global definitions</strong> <a href="#1">1</a>, <a href="#5">5</a>, <a href="#8">8</a>, <a href="#9">9</a>, <a href="#12">12</a>, <a href="#17">17</a>, <a href="#22">22</a>, <a href="#27">27</a>, <a href="#37">37</a>}</span>
 
 <pre class="prettyprint language-python">
 class Block:
@@ -246,7 +267,7 @@ The first line of a code chunk begins with three or more backticks (<code>```</c
 followed by the chunk name. The last line of a code chunk contains only backticks,
 (as many as there were at the chunk&rsquo;s first line).</p>
 
-<div class="codeblock"><span class="codeblock_name"><a id="12">12</a> {<strong>global definitions</strong> <a href="#1">1</a>, <a href="#5">5</a>, <a href="#8">8</a>, <a href="#9">9</a>, <a href="#10">10</a>, <a href="#17">17</a>, <a href="#22">22</a>, <a href="#27">27</a>}</span>
+<div class="codeblock"><span class="codeblock_name"><a id="12">12</a> {<strong>global definitions</strong> <a href="#1">1</a>, <a href="#5">5</a>, <a href="#8">8</a>, <a href="#9">9</a>, <a href="#10">10</a>, <a href="#17">17</a>, <a href="#22">22</a>, <a href="#27">27</a>, <a href="#37">37</a>}</span>
 
 <pre class="prettyprint language-python">
 fence_regexp = re.compile('```+')
@@ -319,7 +340,9 @@ match_fence = fence_regexp.match(line)
 if match_fence and match_fence.end() == fence_length:
     if chunk_name not in chunk:
         chunk[chunk_name] = Chunk()
-    chunk[chunk_name].blocks += [Block(chunk_line+1, block_lines)]
+    new_block = Block(chunk_line+1, block_lines)
+    chunk[chunk_name].blocks += [new_block]
+    block += [new_block]
     reading_code_chunk = False
     last_line_blank = False
 else:
@@ -329,10 +352,11 @@ else:
 
 
 
-<div class="codeblock"><span class="codeblock_name"><a id="17">17</a> {<strong>global definitions</strong> <a href="#1">1</a>, <a href="#5">5</a>, <a href="#8">8</a>, <a href="#9">9</a>, <a href="#10">10</a>, <a href="#12">12</a>, <a href="#22">22</a>, <a href="#27">27</a>}</span>
+<div class="codeblock"><span class="codeblock_name"><a id="17">17</a> {<strong>global definitions</strong> <a href="#1">1</a>, <a href="#5">5</a>, <a href="#8">8</a>, <a href="#9">9</a>, <a href="#10">10</a>, <a href="#12">12</a>, <a href="#22">22</a>, <a href="#27">27</a>, <a href="#37">37</a>}</span>
 
 <pre class="prettyprint language-python">
-chunk = {}
+chunk = {} # all chunks
+block = [] # all code blocks
 </pre><span class="usedin">Used in <a href="#2">2</a>.</span></div>
 
 
@@ -437,7 +461,7 @@ instance, <code>␣␣@{␣␣␣global␣definitions␣␣}␣␣</code>) we pr
 </ol>
 
 
-<div class="codeblock"><span class="codeblock_name"><a id="22">22</a> {<strong>global definitions</strong> <a href="#1">1</a>, <a href="#5">5</a>, <a href="#8">8</a>, <a href="#9">9</a>, <a href="#10">10</a>, <a href="#12">12</a>, <a href="#17">17</a>, <a href="#27">27</a>}</span>
+<div class="codeblock"><span class="codeblock_name"><a id="22">22</a> {<strong>global definitions</strong> <a href="#1">1</a>, <a href="#5">5</a>, <a href="#8">8</a>, <a href="#9">9</a>, <a href="#10">10</a>, <a href="#12">12</a>, <a href="#17">17</a>, <a href="#27">27</a>, <a href="#37">37</a>}</span>
 
 <pre class="prettyprint language-python">
 def chunks_of(code):
@@ -516,7 +540,7 @@ print("! warning: undefined chunk; reference will be kept verbatim: %s" % chunk_
 
 
 
-<div class="codeblock"><span class="codeblock_name"><a id="27">27</a> {<strong>global definitions</strong> <a href="#1">1</a>, <a href="#5">5</a>, <a href="#8">8</a>, <a href="#9">9</a>, <a href="#10">10</a>, <a href="#12">12</a>, <a href="#17">17</a>, <a href="#22">22</a>}</span>
+<div class="codeblock"><span class="codeblock_name"><a id="27">27</a> {<strong>global definitions</strong> <a href="#1">1</a>, <a href="#5">5</a>, <a href="#8">8</a>, <a href="#9">9</a>, <a href="#10">10</a>, <a href="#12">12</a>, <a href="#17">17</a>, <a href="#22">22</a>, <a href="#37">37</a>}</span>
 
 <pre class="prettyprint language-python">
 def is_chunk_line(l):
@@ -554,6 +578,7 @@ with open(file, 'r') as input_file:
     with open(out_filename, 'w') as output_file:
         <code class="chunk_ref">@{output html header}</code>
         <code class="chunk_ref">@{weave source}</code>
+        <code class="chunk_ref">@{prepare and output word index}</code>
         <code class="chunk_ref">@{output html tail}</code>
     print("[ DONE ]")
 </pre><span class="usedin">Used in <a href="#2">2</a>.</span></div>
@@ -708,5 +733,346 @@ if is_chunk_line(line):
 
 print(line, file=output_file, end='')
 </pre><span class="usedin">Used in <a href="#35">35</a>.</span></div>
+
+
+<h2>Word index</h2>
+
+<p>We keep things simple. A <strong>word</strong> is a sequence of 2 or more ascii
+characters which matches the regular <code>[A-Za-z][A-Za-z0-9_]+</code>, with one
+caveat: we ignore all words inside chunk references.</p>
+
+<div class="codeblock"><span class="codeblock_name"><a id="37">37</a> {<strong>global definitions</strong> <a href="#1">1</a>, <a href="#5">5</a>, <a href="#8">8</a>, <a href="#9">9</a>, <a href="#10">10</a>, <a href="#12">12</a>, <a href="#17">17</a>, <a href="#22">22</a>, <a href="#27">27</a>}</span>
+
+<pre class="prettyprint language-python">
+word_reg = '[A-Za-z][A-Za-z0-9_]+'
+</pre><span class="usedin">Used in <a href="#2">2</a>.</span></div>
+
+
+<p>The word index is a dictionary containing, for each word, the id of each code block where the word appears.</p>
+
+<div class="codeblock"><span class="codeblock_name"><a id="38">38</a> {<strong>prepare and output word index</strong>}</span>
+
+<pre class="prettyprint language-python">
+if index:
+    word_dict = {}
+
+    <code class="chunk_ref">@{build word dictionary}</code>
+    <code class="chunk_ref">@{output word index}</code>
+</pre><span class="usedin">Used in <a href="#28">28</a>.</span></div>
+
+
+
+
+<div class="codeblock"><span class="codeblock_name"><a id="39">39</a> {<strong>build word dictionary</strong>}</span>
+
+<pre class="prettyprint language-python">
+for i,b in enumerate(block):
+    words = []
+    for l in b.lines:
+        if not is_chunk_line(l):
+            words += re.findall(word_reg,l)
+
+    for w in words:
+        if w not in word_dict:
+            word_dict[w]  = [i]
+        else:
+            word_dict[w] += [i]
+</pre><span class="usedin">Used in <a href="#38">38</a>.</span></div>
+
+
+
+
+<div class="codeblock"><span class="codeblock_name"><a id="40">40</a> {<strong>output word index</strong>}</span>
+
+<pre class="prettyprint language-python">
+first_letter = ' '
+print("## Word index\n\n", file=output_file)
+print('<' + 'ul>', file=output_file)
+
+for w in sorted(word_dict.keys()):
+    if w[0] != first_letter:
+        if first_letter != ' ':
+            print('<' + '/li><' +'/ul>', file=output_file)            
+        print(('<' +'li class="dict_letter">%c<' + 'ul>') % w[0].upper(), file=output_file)
+        first_letter = w[0]
+
+    <code class="chunk_ref">@{print cross-reference links to blocks where `w` occurs}</code>
+    
+print('<' + '/ul><' + '/ul>', file=output_file)
+</pre><span class="usedin">Used in <a href="#38">38</a>.</span></div>
+
+
+
+
+<div class="codeblock"><span class="codeblock_name"><a id="41">41</a> {<strong>print cross-reference links to blocks where `w` occurs</strong>}</span>
+
+<pre class="prettyprint language-python">
+links = ', '.join([('<'+ 'a href="#%d">%d<' + '/a>') % (block[j].id,block[j].id) for j in list(sorted(set(word_dict[w])))])
+print(('<' +'li>%s: ' + links + '<' + '/li>') % w, file=output_file)
+</pre><span class="usedin">Used in <a href="#40">40</a>.</span></div>
+
+
+<h2>Word index</h2>
+
+<ul>
+<li class="dict_letter">A<ul>
+<li>ArgumentParser: <a href="#5">5</a></li>
+</li></ul>
+<li class="dict_letter">B<ul>
+<li>Block: <a href="#10">10</a>, <a href="#16">16</a></li>
+</li></ul>
+<li class="dict_letter">C<ul>
+<li>Chunk: <a href="#9">9</a>, <a href="#16">16</a></li>
+<li>Collection: <a href="#9">9</a></li>
+</li></ul>
+<li class="dict_letter">D<ul>
+<li>DONE: <a href="#23">23</a>, <a href="#28">28</a></li>
+</li></ul>
+<li class="dict_letter">F<ul>
+<li>False: <a href="#8">8</a>, <a href="#11">11</a>, <a href="#14">14</a>, <a href="#16">16</a>, <a href="#31">31</a>, <a href="#32">32</a>, <a href="#35">35</a></li>
+</li></ul>
+<li class="dict_letter">H<ul>
+<li>Hi: <a href="#2">2</a></li>
+</li></ul>
+<li class="dict_letter">L<ul>
+<li>Lines: <a href="#10">10</a></li>
+</li></ul>
+<li class="dict_letter">T<ul>
+<li>This: <a href="#1">1</a></li>
+<li>True: <a href="#8">8</a>, <a href="#14">14</a>, <a href="#32">32</a></li>
+</li></ul>
+<li class="dict_letter">U<ul>
+<li>Used: <a href="#35">35</a></li>
+</li></ul>
+<li class="dict_letter">V<ul>
+<li>VISCONDE: <a href="#1">1</a></li>
+</li></ul>
+<li class="dict_letter">W<ul>
+<li>Word: <a href="#40">40</a></li>
+<li>Writing: <a href="#23">23</a>, <a href="#28">28</a></li>
+</li></ul>
+<li class="dict_letter">Z<ul>
+<li>Za: <a href="#37">37</a></li>
+</li></ul>
+<li class="dict_letter">A<ul>
+<li>abort: <a href="#7">7</a>, <a href="#19">19</a></li>
+<li>action: <a href="#4">4</a></li>
+<li>add_argument: <a href="#4">4</a></li>
+<li>add_indent: <a href="#25">25</a>, <a href="#27">27</a></li>
+<li>all: <a href="#17">17</a></li>
+<li>alright: <a href="#21">21</a></li>
+<li>and: <a href="#7">7</a>, <a href="#16">16</a>, <a href="#18">18</a>, <a href="#27">27</a>, <a href="#35">35</a></li>
+<li>any: <a href="#21">21</a></li>
+<li>argparse: <a href="#5">5</a>, <a href="#6">6</a></li>
+<li>args: <a href="#4">4</a>, <a href="#7">7</a></li>
+<li>as: <a href="#11">11</a>, <a href="#23">23</a>, <a href="#28">28</a></li>
+<li>aux: <a href="#27">27</a></li>
+</li></ul>
+<li class="dict_letter">B<ul>
+<li>banner: <a href="#1">1</a>, <a href="#2">2</a></li>
+<li>be: <a href="#26">26</a></li>
+<li>blk: <a href="#18">18</a>, <a href="#20">20</a>, <a href="#23">23</a></li>
+<li>block: <a href="#10">10</a>, <a href="#16">16</a>, <a href="#17">17</a>, <a href="#39">39</a>, <a href="#41">41</a></li>
+<li>block_counter: <a href="#10">10</a></li>
+<li>block_lines: <a href="#10">10</a>, <a href="#11">11</a>, <a href="#14">14</a>, <a href="#16">16</a></li>
+<li>blocks: <a href="#9">9</a>, <a href="#16">16</a>, <a href="#17">17</a>, <a href="#20">20</a>, <a href="#23">23</a>, <a href="#25">25</a>, <a href="#34">34</a></li>
+<li>buffer: <a href="#23">23</a>, <a href="#24">24</a>, <a href="#25">25</a></li>
+</li></ul>
+<li class="dict_letter">C<ul>
+<li>cannot: <a href="#21">21</a></li>
+<li>chk: <a href="#20">20</a></li>
+<li>chosen: <a href="#21">21</a></li>
+<li>chunk: <a href="#4">4</a>, <a href="#16">16</a>, <a href="#17">17</a>, <a href="#19">19</a>, <a href="#20">20</a>, <a href="#21">21</a>, <a href="#23">23</a>, <a href="#24">24</a>, <a href="#25">25</a>, <a href="#26">26</a>, <a href="#34">34</a></li>
+<li>chunk_id: <a href="#33">33</a>, <a href="#34">34</a></li>
+<li>chunk_lang_begin: <a href="#33">33</a></li>
+<li>chunk_language: <a href="#33">33</a></li>
+<li>chunk_line: <a href="#14">14</a>, <a href="#16">16</a></li>
+<li>chunk_line_name: <a href="#24">24</a>, <a href="#27">27</a>, <a href="#36">36</a></li>
+<li>chunk_name: <a href="#11">11</a>, <a href="#15">15</a>, <a href="#16">16</a>, <a href="#24">24</a>, <a href="#25">25</a>, <a href="#26">26</a>, <a href="#31">31</a>, <a href="#33">33</a>, <a href="#34">34</a>, <a href="#35">35</a></li>
+<li>chunk_ref: <a href="#36">36</a></li>
+<li>chunks: <a href="#17">17</a>, <a href="#19">19</a>, <a href="#21">21</a></li>
+<li>chunks_of: <a href="#20">20</a>, <a href="#22">22</a></li>
+<li>class: <a href="#9">9</a>, <a href="#10">10</a>, <a href="#33">33</a>, <a href="#35">35</a>, <a href="#36">36</a>, <a href="#40">40</a></li>
+<li>code: <a href="#10">10</a>, <a href="#17">17</a>, <a href="#22">22</a>, <a href="#27">27</a>, <a href="#36">36</a></li>
+<li>code_block_counter: <a href="#31">31</a>, <a href="#32">32</a>, <a href="#33">33</a></li>
+<li>code_chunk_header: <a href="#32">32</a>, <a href="#33">33</a></li>
+<li>codeblock: <a href="#33">33</a></li>
+<li>codeblock_name: <a href="#33">33</a></li>
+<li>compile: <a href="#12">12</a>, <a href="#25">25</a></li>
+<li>continue: <a href="#14">14</a>, <a href="#32">32</a></li>
+<li>contradictory: <a href="#7">7</a></li>
+</li></ul>
+<li class="dict_letter">D<ul>
+<li>def: <a href="#9">9</a>, <a href="#10">10</a>, <a href="#22">22</a>, <a href="#27">27</a></li>
+<li>default: <a href="#4">4</a></li>
+<li>dict: <a href="#20">20</a></li>
+<li>dict_letter: <a href="#40">40</a></li>
+<li>div: <a href="#33">33</a>, <a href="#35">35</a></li>
+<li>do: <a href="#4">4</a></li>
+</li></ul>
+<li class="dict_letter">E<ul>
+<li>elif: <a href="#14">14</a>, <a href="#21">21</a>, <a href="#32">32</a></li>
+<li>else: <a href="#14">14</a>, <a href="#16">16</a>, <a href="#18">18</a>, <a href="#20">20</a>, <a href="#21">21</a>, <a href="#24">24</a>, <a href="#32">32</a>, <a href="#33">33</a>, <a href="#35">35</a>, <a href="#39">39</a></li>
+<li>end: <a href="#14">14</a>, <a href="#16">16</a>, <a href="#23">23</a>, <a href="#24">24</a>, <a href="#25">25</a>, <a href="#28">28</a>, <a href="#29">29</a>, <a href="#30">30</a>, <a href="#32">32</a>, <a href="#35">35</a>, <a href="#36">36</a></li>
+<li>enumerate: <a href="#11">11</a>, <a href="#20">20</a>, <a href="#31">31</a>, <a href="#39">39</a></li>
+<li>error: <a href="#7">7</a>, <a href="#19">19</a></li>
+</li></ul>
+<li class="dict_letter">F<ul>
+<li>fence: <a href="#4">4</a></li>
+<li>fence_length: <a href="#14">14</a>, <a href="#15">15</a>, <a href="#16">16</a>, <a href="#32">32</a>, <a href="#33">33</a>, <a href="#35">35</a></li>
+<li>fence_regexp: <a href="#12">12</a>, <a href="#14">14</a>, <a href="#16">16</a>, <a href="#32">32</a>, <a href="#35">35</a></li>
+<li>fenced_with_language: <a href="#7">7</a>, <a href="#8">8</a>, <a href="#15">15</a>, <a href="#33">33</a></li>
+<li>fencedwithlanguage: <a href="#4">4</a>, <a href="#7">7</a></li>
+<li>file: <a href="#4">4</a>, <a href="#7">7</a>, <a href="#8">8</a>, <a href="#11">11</a>, <a href="#23">23</a>, <a href="#24">24</a>, <a href="#28">28</a>, <a href="#29">29</a>, <a href="#30">30</a>, <a href="#32">32</a>, <a href="#35">35</a>, <a href="#36">36</a>, <a href="#40">40</a>, <a href="#41">41</a></li>
+<li>find: <a href="#21">21</a></li>
+<li>findall: <a href="#39">39</a></li>
+<li>first: <a href="#4">4</a></li>
+<li>first_letter: <a href="#40">40</a></li>
+<li>flag: <a href="#7">7</a></li>
+<li>flags: <a href="#7">7</a></li>
+<li>for: <a href="#11">11</a>, <a href="#18">18</a>, <a href="#20">20</a>, <a href="#21">21</a>, <a href="#22">22</a>, <a href="#23">23</a>, <a href="#25">25</a>, <a href="#27">27</a>, <a href="#31">31</a>, <a href="#34">34</a>, <a href="#35">35</a>, <a href="#39">39</a>, <a href="#40">40</a>, <a href="#41">41</a></li>
+</li></ul>
+<li class="dict_letter">G<ul>
+<li>generate: <a href="#4">4</a></li>
+</li></ul>
+<li class="dict_letter">H<ul>
+<li>help: <a href="#4">4</a></li>
+<li>href: <a href="#34">34</a>, <a href="#35">35</a>, <a href="#41">41</a></li>
+<li>html_header: <a href="#29">29</a></li>
+<li>html_tail: <a href="#30">30</a></li>
+</li></ul>
+<li class="dict_letter">I<ul>
+<li>id: <a href="#10">10</a>, <a href="#20">20</a>, <a href="#33">33</a>, <a href="#34">34</a>, <a href="#35">35</a>, <a href="#41">41</a></li>
+<li>if: <a href="#7">7</a>, <a href="#14">14</a>, <a href="#15">15</a>, <a href="#16">16</a>, <a href="#18">18</a>, <a href="#20">20</a>, <a href="#21">21</a>, <a href="#22">22</a>, <a href="#24">24</a>, <a href="#32">32</a>, <a href="#33">33</a>, <a href="#34">34</a>, <a href="#35">35</a>, <a href="#36">36</a>, <a href="#38">38</a>, <a href="#39">39</a>, <a href="#40">40</a></li>
+<li>import: <a href="#6">6</a>, <a href="#13">13</a></li>
+<li>in: <a href="#11">11</a>, <a href="#16">16</a>, <a href="#18">18</a>, <a href="#20">20</a>, <a href="#21">21</a>, <a href="#22">22</a>, <a href="#23">23</a>, <a href="#24">24</a>, <a href="#25">25</a>, <a href="#27">27</a>, <a href="#31">31</a>, <a href="#34">34</a>, <a href="#35">35</a>, <a href="#39">39</a>, <a href="#40">40</a>, <a href="#41">41</a></li>
+<li>ind_lns: <a href="#25">25</a></li>
+<li>indent: <a href="#25">25</a></li>
+<li>indent_amount: <a href="#27">27</a></li>
+<li>index: <a href="#4">4</a>, <a href="#7">7</a>, <a href="#8">8</a>, <a href="#38">38</a>, <a href="#40">40</a></li>
+<li>init__: <a href="#9">9</a>, <a href="#10">10</a></li>
+<li>input: <a href="#7">7</a></li>
+<li>input_file: <a href="#11">11</a>, <a href="#28">28</a>, <a href="#31">31</a></li>
+<li>insert: <a href="#24">24</a></li>
+<li>is: <a href="#1">1</a>, <a href="#4">4</a></li>
+<li>is_chunk_line: <a href="#22">22</a>, <a href="#24">24</a>, <a href="#27">27</a>, <a href="#36">36</a>, <a href="#39">39</a></li>
+<li>it: <a href="#21">21</a></li>
+<li>items: <a href="#20">20</a></li>
+</li></ul>
+<li class="dict_letter">J<ul>
+<li>join: <a href="#21">21</a>, <a href="#34">34</a>, <a href="#35">35</a>, <a href="#41">41</a></li>
+</li></ul>
+<li class="dict_letter">K<ul>
+<li>kept: <a href="#26">26</a></li>
+<li>keys: <a href="#40">40</a></li>
+</li></ul>
+<li class="dict_letter">L<ul>
+<li>language: <a href="#4">4</a>, <a href="#33">33</a></li>
+<li>last_line_blank: <a href="#11">11</a>, <a href="#14">14</a>, <a href="#16">16</a>, <a href="#31">31</a>, <a href="#32">32</a>, <a href="#35">35</a></li>
+<li>len: <a href="#18">18</a>, <a href="#20">20</a>, <a href="#21">21</a>, <a href="#23">23</a>, <a href="#35">35</a></li>
+<li>li: <a href="#40">40</a>, <a href="#41">41</a></li>
+<li>line: <a href="#11">11</a>, <a href="#14">14</a>, <a href="#15">15</a>, <a href="#16">16</a>, <a href="#22">22</a>, <a href="#27">27</a>, <a href="#31">31</a>, <a href="#32">32</a>, <a href="#33">33</a>, <a href="#35">35</a>, <a href="#36">36</a></li>
+<li>line_number: <a href="#10">10</a>, <a href="#11">11</a>, <a href="#14">14</a>, <a href="#31">31</a></li>
+<li>lines: <a href="#10">10</a>, <a href="#11">11</a>, <a href="#20">20</a>, <a href="#23">23</a>, <a href="#25">25</a>, <a href="#39">39</a></li>
+<li>links: <a href="#41">41</a></li>
+<li>list: <a href="#11">11</a>, <a href="#19">19</a>, <a href="#41">41</a></li>
+<li>literate: <a href="#4">4</a></li>
+</li></ul>
+<li class="dict_letter">M<ul>
+<li>many: <a href="#19">19</a></li>
+<li>many_outpus: <a href="#7">7</a>, <a href="#8">8</a>, <a href="#18">18</a></li>
+<li>manyoutputs: <a href="#4">4</a>, <a href="#7">7</a></li>
+<li>match: <a href="#14">14</a>, <a href="#16">16</a>, <a href="#25">25</a>, <a href="#32">32</a>, <a href="#35">35</a></li>
+<li>match_fence: <a href="#14">14</a>, <a href="#16">16</a>, <a href="#32">32</a>, <a href="#35">35</a></li>
+<li>md: <a href="#28">28</a></li>
+</li></ul>
+<li class="dict_letter">N<ul>
+<li>name: <a href="#4">4</a>, <a href="#9">9</a></li>
+<li>new_block: <a href="#16">16</a></li>
+<li>no: <a href="#7">7</a>, <a href="#21">21</a></li>
+<li>nofencedwithlanguage: <a href="#4">4</a>, <a href="#7">7</a></li>
+<li>noindex: <a href="#4">4</a>, <a href="#7">7</a></li>
+<li>nomanyoutputs: <a href="#4">4</a>, <a href="#7">7</a></li>
+<li>not: <a href="#4">4</a>, <a href="#7">7</a>, <a href="#14">14</a>, <a href="#16">16</a>, <a href="#18">18</a>, <a href="#20">20</a>, <a href="#24">24</a>, <a href="#32">32</a>, <a href="#39">39</a></li>
+<li>notangle: <a href="#4">4</a>, <a href="#7">7</a></li>
+</li></ul>
+<li class="dict_letter">O<ul>
+<li>of: <a href="#9">9</a>, <a href="#10">10</a>, <a href="#11">11</a></li>
+<li>on: <a href="#4">4</a></li>
+<li>one: <a href="#4">4</a></li>
+<li>open: <a href="#11">11</a>, <a href="#23">23</a>, <a href="#28">28</a></li>
+<li>opening: <a href="#4">4</a></li>
+<li>option: <a href="#21">21</a></li>
+<li>other_blocks: <a href="#33">33</a>, <a href="#34">34</a></li>
+<li>out_filename: <a href="#28">28</a></li>
+<li>output: <a href="#4">4</a>, <a href="#23">23</a>, <a href="#24">24</a></li>
+<li>output_file: <a href="#28">28</a>, <a href="#29">29</a>, <a href="#30">30</a>, <a href="#32">32</a>, <a href="#35">35</a>, <a href="#36">36</a>, <a href="#40">40</a>, <a href="#41">41</a></li>
+<li>outputs: <a href="#4">4</a></li>
+</li></ul>
+<li class="dict_letter">P<ul>
+<li>parents: <a href="#20">20</a></li>
+<li>parse_args: <a href="#4">4</a></li>
+<li>parser: <a href="#4">4</a>, <a href="#5">5</a></li>
+<li>per: <a href="#4">4</a></li>
+<li>pre: <a href="#33">33</a></li>
+<li>prettyprint: <a href="#33">33</a></li>
+<li>print: <a href="#2">2</a>, <a href="#7">7</a>, <a href="#19">19</a>, <a href="#20">20</a>, <a href="#21">21</a>, <a href="#23">23</a>, <a href="#24">24</a>, <a href="#26">26</a>, <a href="#28">28</a>, <a href="#29">29</a>, <a href="#30">30</a>, <a href="#32">32</a>, <a href="#35">35</a>, <a href="#36">36</a>, <a href="#40">40</a>, <a href="#41">41</a></li>
+<li>produce: <a href="#4">4</a></li>
+</li></ul>
+<li class="dict_letter">R<ul>
+<li>re: <a href="#12">12</a>, <a href="#13">13</a>, <a href="#25">25</a>, <a href="#35">35</a>, <a href="#39">39</a></li>
+<li>reading_code_chunk: <a href="#11">11</a>, <a href="#14">14</a>, <a href="#16">16</a>, <a href="#31">31</a>, <a href="#32">32</a>, <a href="#35">35</a></li>
+<li>reference: <a href="#24">24</a>, <a href="#26">26</a></li>
+<li>rest: <a href="#4">4</a></li>
+<li>return: <a href="#22">22</a>, <a href="#27">27</a></li>
+<li>root: <a href="#4">4</a>, <a href="#19">19</a>, <a href="#21">21</a></li>
+<li>root_chunks: <a href="#18">18</a>, <a href="#19">19</a>, <a href="#20">20</a>, <a href="#21">21</a></li>
+</li></ul>
+<li class="dict_letter">S<ul>
+<li>same: <a href="#9">9</a></li>
+<li>seealso: <a href="#35">35</a></li>
+<li>self: <a href="#9">9</a>, <a href="#10">10</a></li>
+<li>set: <a href="#41">41</a></li>
+<li>sorted: <a href="#40">40</a>, <a href="#41">41</a></li>
+<li>source: <a href="#4">4</a></li>
+<li>span: <a href="#33">33</a>, <a href="#35">35</a></li>
+<li>start: <a href="#10">10</a></li>
+<li>store_true: <a href="#4">4</a></li>
+<li>strip: <a href="#14">14</a>, <a href="#15">15</a>, <a href="#22">22</a>, <a href="#27">27</a>, <a href="#32">32</a>, <a href="#33">33</a></li>
+<li>strong: <a href="#33">33</a></li>
+</li></ul>
+<li class="dict_letter">T<ul>
+<li>tangle: <a href="#4">4</a>, <a href="#7">7</a>, <a href="#8">8</a>, <a href="#18">18</a>, <a href="#21">21</a></li>
+<li>tangled: <a href="#4">4</a></li>
+<li>text: <a href="#4">4</a></li>
+<li>the: <a href="#4">4</a></li>
+<li>todo: <a href="#7">7</a>, <a href="#19">19</a>, <a href="#21">21</a></li>
+<li>too: <a href="#19">19</a></li>
+</li></ul>
+<li class="dict_letter">U<ul>
+<li>ul: <a href="#40">40</a></li>
+<li>undefined: <a href="#26">26</a></li>
+<li>upper: <a href="#40">40</a></li>
+<li>used_at: <a href="#20">20</a>, <a href="#35">35</a></li>
+<li>usedin: <a href="#35">35</a></li>
+</li></ul>
+<li class="dict_letter">V<ul>
+<li>verbatim: <a href="#24">24</a>, <a href="#26">26</a></li>
+<li>version: <a href="#1">1</a></li>
+</li></ul>
+<li class="dict_letter">W<ul>
+<li>warning: <a href="#21">21</a>, <a href="#26">26</a></li>
+<li>was: <a href="#21">21</a></li>
+<li>while: <a href="#15">15</a>, <a href="#23">23</a>, <a href="#33">33</a>, <a href="#36">36</a></li>
+<li>will: <a href="#26">26</a></li>
+<li>with: <a href="#9">9</a>, <a href="#11">11</a>, <a href="#23">23</a>, <a href="#28">28</a></li>
+<li>word: <a href="#4">4</a></li>
+<li>word_dict: <a href="#38">38</a>, <a href="#39">39</a>, <a href="#40">40</a>, <a href="#41">41</a></li>
+<li>word_reg: <a href="#37">37</a>, <a href="#39">39</a></li>
+<li>words: <a href="#39">39</a></li>
+</li></ul>
+<li class="dict_letter">Z<ul>
+<li>z0: <a href="#37">37</a></li>
+</ul></ul>
 
 </body></html>

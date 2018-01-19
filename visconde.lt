@@ -21,7 +21,7 @@ breaks).
 The line below should be updated whenever this program is changed.
 
 ``` python global definitions
-banner = "This is VISCONDE version 0.1.5."
+banner = "This is VISCONDE version 0.1.6."
 ```
 
 Here is the program outline.
@@ -39,8 +39,8 @@ print(banner) # Hi!
 @{output weaved file}
 ```
 
-## Arguments
 
+## Arguments
 
 The main argument is the path to the literate source file. Arguments
 are parsed as usual in most command line applications, so a typical
@@ -57,6 +57,8 @@ Where `OPTIONS` can be one or more of the following.
 - `--tangle` produce tangled outputs (default)
 - `--notangle` do not produce tangled outputs
 - `--markdownsections` use markdown headings (lines starting by up to six `#` characters) as section divisions (default, and currently only option)
+- `--index` produce word index (default)
+- `--noindex` no word index
 
 ``` python parse arguments
 @{build argument parser}
@@ -88,6 +90,13 @@ parser.add_argument(              "--tangle", action="store_true",
 parser.add_argument(            "--notangle", action="store_true", 
     help="do not produce tangled outputs")
 
+# index ================================================================
+parser.add_argument(               "--index", action="store_true",
+    help="produce word index (default)")
+parser.add_argument(             "--noindex", action="store_true",
+    help="do not produce word index")
+
+
 # ======================================================================
 args = parser.parse_args()
 ```
@@ -107,12 +116,14 @@ It is time to enforce the default behaviour for each pair of flags
 # input file ===========================================================
 file = args.file
 
+
 # flag (no)fencedwithlanguage ==========================================
 if args.fencedwithlanguage and args.nofencedwithlanguage:
     print('! error: contradictory flags (fencedwithlanguage and nofencedwithlanguage)')
     #todo abort
 
 fenced_with_language = args.fencedwithlanguage
+
 
 # flag (no)manyoutputs =================================================
 if args.manyoutputs and args.nomanyoutputs:
@@ -121,12 +132,21 @@ if args.manyoutputs and args.nomanyoutputs:
 
 many_outpus = args.manyoutputs
 
+
 # flag (no)tangle ======================================================
 if args.tangle and args.notangle:
     print('! error: contradictory flags (tangle and notangle)')
     #todo abort
 
 tangle = not args.notangle
+
+
+# flag (no)index =======================================================
+if args.index and args.noindex:
+    print('! error: contradictory flags (index and noindex)')
+    #todo abort
+
+index = not args.noindex
 ```
 
 The flags are available to the rest of the program via the global
@@ -137,7 +157,8 @@ file = ""
 
 fenced_with_language = False
 many_outpus = False
-tangle = False
+tangle = True
+index = True
 ```
 
 
@@ -147,7 +168,7 @@ Visconde sees the input file as a series of lines which are either
 text (natural language prose), code (to be tangled) or a fence
 (boundary between the two). Each occurence of code surrounded by
 fences forms a **block** (or code block); the (ordered) collection of code
-blocks with same name forms a **chunk**. 
+blocks with same name forms a **chunk**.
 
 ``` python global definitions
 class Chunk:
@@ -256,7 +277,9 @@ match_fence = fence_regexp.match(line)
 if match_fence and match_fence.end() == fence_length:
     if chunk_name not in chunk:
         chunk[chunk_name] = Chunk()
-    chunk[chunk_name].blocks += [Block(chunk_line+1, block_lines)]
+    new_block = Block(chunk_line+1, block_lines)
+    chunk[chunk_name].blocks += [new_block]
+    block += [new_block]
     reading_code_chunk = False
     last_line_blank = False
 else:
@@ -264,7 +287,8 @@ else:
 ```
 
 ``` python global definitions
-chunk = {}
+chunk = {} # all chunks
+block = [] # all code blocks
 ```
 
 ## From chunks to files
@@ -442,6 +466,7 @@ with open(file, 'r') as input_file:
     with open(out_filename, 'w') as output_file:
         @{output html header}
         @{weave source}
+        @{prepare and output word index}
         @{output html tail}
     print("[ DONE ]")
 ```
@@ -568,4 +593,60 @@ if is_chunk_line(line):
     line = ' '*j + '<' + 'code class="chunk_ref">@{' + chunk_line_name(line) + '}<' + '/code>\n'
 
 print(line, file=output_file, end='')
+```
+
+## Word index
+
+We keep things simple. A **word** is a sequence of 2 or more ascii
+characters which matches the regular `[A-Za-z][A-Za-z0-9_]+`, with one
+caveat: we ignore all words inside chunk references.
+
+``` python global definitions
+word_reg = '[A-Za-z][A-Za-z0-9_]+'
+```
+
+The word index is a dictionary containing, for each word, the id of each code block where the word appears.
+
+``` python prepare and output word index
+if index:
+    word_dict = {}
+
+    @{build word dictionary}
+    @{output word index}
+```
+
+``` python build word dictionary
+for i,b in enumerate(block):
+    words = []
+    for l in b.lines:
+        if not is_chunk_line(l):
+            words += re.findall(word_reg,l)
+
+    for w in words:
+        if w not in word_dict:
+            word_dict[w]  = [i]
+        else:
+            word_dict[w] += [i]
+```
+
+``` python output word index
+first_letter = ' '
+print("## Word index\n\n", file=output_file)
+print('<' + 'ul>', file=output_file)
+
+for w in sorted(word_dict.keys()):
+    if w[0] != first_letter:
+        if first_letter != ' ':
+            print('<' + '/li><' +'/ul>', file=output_file)
+        print(('<' +'li class="dict_letter">%c<' + 'ul>') % w[0].upper(), file=output_file)
+        first_letter = w[0]
+
+    @{print cross-reference links to blocks where `w` occurs}
+
+print('<' + '/ul><' + '/ul>', file=output_file)
+```
+
+``` python print cross-reference links to blocks where `w` occurs
+links = ', '.join([('<'+ 'a href="#%d">%d<' + '/a>') % (block[j].id,block[j].id) for j in list(sorted(set(word_dict[w])))])
+print(('<' +'li>%s: ' + links + '<' + '/li>') % w, file=output_file)
 ```

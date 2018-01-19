@@ -90,6 +90,8 @@ For help and options run `python3 visconde.py -h`.
   - [ ] chunk cross-references
   - [ ] variable cross-references (see next item)
   - [ ] Language weaving backend (incorporate markdown parser, be smart about which language is used)
+  - [ ] identify first appearance of word/identifier
+  - [ ] section-awareness (e.g: table of contents word index also over code in text sections
 - Warnings
   - [ ] chunk without name
   - [ ] file ends before code chunk does

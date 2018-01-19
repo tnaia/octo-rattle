@@ -3,6 +3,7 @@ MARKDOWN=markdown -f fencedcode -f nostyle
 
 visconde.py: visconde.lt
 	$(PYTHON) visconde.py --fencedwithlanguage visconde.lt
+	$(PYTHON) visconde.py --fencedwithlanguage visconde.lt
 
 visconde.lt.md: visconde.lt
 	$(PYTHON) visconde.py --fencedwithlanguage visconde.lt

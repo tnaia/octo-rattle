@@ -1,5 +1,10 @@
 # Changes to visconde
 
+## v 0.1.6
+
+- Index words in code blocks, print word index with hyperlinks to
+  relevant sections.
+
 ## v 0.1.5
 
 - Chunks numbered, with hyperlinked cross-references.

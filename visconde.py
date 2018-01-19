@@ -1,12 +1,13 @@
 import argparse
 import re
-banner = "This is VISCONDE version 0.1.5."
+banner = "This is VISCONDE version 0.1.6."
 parser = argparse.ArgumentParser()
 file = ""
 
 fenced_with_language = False
 many_outpus = False
-tangle = False
+tangle = True
+index = True
 class Chunk:
     '''Collection of blocks with same name'''
     
@@ -22,7 +23,8 @@ class Block:
         Block.block_counter +=1
         self.id = Block.block_counter
 fence_regexp = re.compile('```+')
-chunk = {}
+chunk = {} # all chunks
+block = [] # all code blocks
 def chunks_of(code):
     return [line.strip()[2:-1].strip() for line in code if is_chunk_line(line)]
 def is_chunk_line(l):
@@ -34,6 +36,7 @@ def chunk_line_name(line):
 
 def add_indent(indent_amount, code):
     return [' '*indent_amount + line for line in code]
+word_reg = '[A-Za-z][A-Za-z0-9_]+'
 
 # file =================================================================
 parser.add_argument("file", help="literate source file")
@@ -56,10 +59,18 @@ parser.add_argument(              "--tangle", action="store_true",
 parser.add_argument(            "--notangle", action="store_true", 
     help="do not produce tangled outputs")
 
+# index ================================================================
+parser.add_argument(               "--index", action="store_true",
+    help="produce word index (default)")
+parser.add_argument(             "--noindex", action="store_true",
+    help="do not produce word index")
+
+
 # ======================================================================
 args = parser.parse_args()
 # input file ===========================================================
 file = args.file
+
 
 # flag (no)fencedwithlanguage ==========================================
 if args.fencedwithlanguage and args.nofencedwithlanguage:
@@ -68,6 +79,7 @@ if args.fencedwithlanguage and args.nofencedwithlanguage:
 
 fenced_with_language = args.fencedwithlanguage
 
+
 # flag (no)manyoutputs =================================================
 if args.manyoutputs and args.nomanyoutputs:
     print('! error: contradictory flags (manyoutputs and nomanyoutputs)')
@@ -75,12 +87,21 @@ if args.manyoutputs and args.nomanyoutputs:
 
 many_outpus = args.manyoutputs
 
+
 # flag (no)tangle ======================================================
 if args.tangle and args.notangle:
     print('! error: contradictory flags (tangle and notangle)')
     #todo abort
 
 tangle = not args.notangle
+
+
+# flag (no)index =======================================================
+if args.index and args.noindex:
+    print('! error: contradictory flags (index and noindex)')
+    #todo abort
+
+index = not args.noindex
 
 print(banner) # Hi!
 
@@ -118,7 +139,9 @@ with open(file, 'r') as input_file:
         if match_fence and match_fence.end() == fence_length:
             if chunk_name not in chunk:
                 chunk[chunk_name] = Chunk()
-            chunk[chunk_name].blocks += [Block(chunk_line+1, block_lines)]
+            new_block = Block(chunk_line+1, block_lines)
+            chunk[chunk_name].blocks += [new_block]
+            block += [new_block]
             reading_code_chunk = False
             last_line_blank = False
         else:
@@ -246,6 +269,35 @@ with open(file, 'r') as input_file:
                 
                 print(line, file=output_file, end='')
         
+        if index:
+            word_dict = {}
+        
+            for i,b in enumerate(block):
+                words = []
+                for l in b.lines:
+                    if not is_chunk_line(l):
+                        words += re.findall(word_reg,l)
+            
+                for w in words:
+                    if w not in word_dict:
+                        word_dict[w]  = [i]
+                    else:
+                        word_dict[w] += [i]
+            first_letter = ' '
+            print("## Word index\n\n", file=output_file)
+            print('<' + 'ul>', file=output_file)
+            
+            for w in sorted(word_dict.keys()):
+                if w[0] != first_letter:
+                    if first_letter != ' ':
+                        print('<' + '/li><' +'/ul>', file=output_file)
+                    print(('<' +'li class="dict_letter">%c<' + 'ul>') % w[0].upper(), file=output_file)
+                    first_letter = w[0]
+            
+                links = ', '.join([('<'+ 'a href="#%d">%d<' + '/a>') % (block[j].id,block[j].id) for j in list(sorted(set(word_dict[w])))])
+                print(('<' +'li>%s: ' + links + '<' + '/li>') % w, file=output_file)
+            
+            print('<' + '/ul><' + '/ul>', file=output_file)
         html_tail = ''
         print(html_tail, file=output_file, end='')
     print("[ DONE ]")
