@@ -86,23 +86,23 @@ For help and options run `python3 visconde.py -h`.
 ## Todo
 
 - Features
-  - [ ] allow references to chunks from the text
-  - [x] chunk cross-references
   - [x] basic weave (assumes input is [GFM](https://help.github.com/articles/about-writing-and-formatting-on-github/) outputs markdown plus some html tags)
+  - [x] weave: chunk cross-references
   - [x] weave: dumb word index (see next item)
   - [x] process fenced blocks having a language spec on the open-fence line (not default action, but controllable by command line option)
+  - [ ] weave: allow references to chunks from the text
   - [ ] identify first appearance of word/identifier
   - [ ] better weaving backend (incorporate markdown parser, be smart about which language is used)
   - [ ] section-awareness (e.g: table of contents word index also over code in text sections
   - [ ] option to set language for all fenced blocks
 
 - Warnings
-  - [ ] chunk without name
-  - [ ] file ends before code chunk does
-  - [ ] circular chunk dependencies
   - [x] generate a file for each root chunk
   - [x] if multiple root files are found, only generate multiple output
         files if a flag is set)
+  - [ ] chunk without name
+  - [ ] file ends before code chunk does
+  - [ ] circular chunk dependencies
   - [ ] warn if distinct blocks of same code chunk have different languages
 - Flags/arguments
   - [ ] flag for dry-run (just warnings, no output)
@@ -112,11 +112,13 @@ For help and options run `python3 visconde.py -h`.
 ## Nice to have
 
 - [x] changefile!
-
+- [ ] section index
 ## Known bugs
 
 Please let us know!
 
+- [ ] produce output even when there is no input file
+- [ ] assumes markdown input when weaving (no flag to prevent this)
 - [ ] code chunks in code. e.g.: `@{x}` on a line of its own in code chunk
 - [ ] html tags in code chunks e.g., `</pre>` inside of code chunk
 

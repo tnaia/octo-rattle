@@ -47,7 +47,7 @@
         padding: 2pt
     }
 }
-li {
+li.dict_letter li { {
     font-family: monospace;
     font-size: 80%
 }

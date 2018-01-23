@@ -253,18 +253,18 @@ if not reading_code_chunk:
 
 The chunk name is a stripped substring of the opening fence. If chunks
 do not have a language specification, then the chunk name is the
-(space-stripped) substring of line which goes from the last backtick
+(space-stripped) substring of `line` beginning after the last backtick
 of the fence until the end of the line; otherwise, it goes from the
-first space character and goes until the end of the line (we do this
-so that the fence can be followed immediately by a language
-specification).
+first space following the language specification and goes until the
+end of the line (we do this so that the fence can be followed
+immediately by a language specification).
 
 ```python set `chunk_name`
 j = fence_length
 if fenced_with_language:
-    while line[j] == ' ':
+    while line[j] == ' ': # skip spaces before language specification
         j += 1
-    while line[j] != ' ':
+    while line[j] != ' ': # skip language specification
         j += 1
 chunk_name = line[j+1:].strip()
 ```
