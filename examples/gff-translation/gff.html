@@ -124,20 +124,27 @@ nRsb347.2.0.scaf00001   AUGUSTUS    terminal    9008    9145    0.99    -   0   
 <div class="codeblock"><span class="codeblock_name"><a id="2">2</a> {<strong>read files and generate output</strong>} =</span>
 
 <pre class="prettyprint language-python">
-with open(agp_filename, 'r') as agp_file:
-    with open(gff_filename, 'r') as gff_file:
-        with open(out_filename, 'w') as out_file:
+with open(gff_filename, 'r') as gff_file:
+    with open(out_filename, 'w') as out_file:
 
+        with open(agp_filename, 'r') as agp_file:
             <code class="chunk_ref">@{process AGP file <a href="#5">5</a>}</code>
-            <code class="chunk_ref">@{proces GFF file and generate output <a href="#8">8</a>}</code>
+
+        <code class="chunk_ref">@{proces GFF file and generate output <a href="#8">8</a>}</code>
 </pre><span class="usedin">Used in <a href="#1">1</a>.</span></div>
 
 
-
+<p>It is <strong>very</strong> important check the number of arguments;
+<code>sys.argv</code> should contain the name of the script, and all the arguments which were passed.</p>
 
 <div class="codeblock"><span class="codeblock_name"><a id="3">3</a> {<strong>process arguments</strong>} =</span>
 
 <pre class="prettyprint language-python">
+if len(sys.argv) != 4:
+    print('! error: wrong number of arguments.')
+    print('  usage: script AGP_FILE GFF_FILE OUTPUT_FILE')
+    raise SystemExit('Wrong number of arguments.')
+
 agp_filename = sys.argv[-3]
 gff_filename = sys.argv[-2]
 out_filename = sys.argv[-1]
@@ -217,20 +224,19 @@ gff_line_number = 1
 
 # loop until file is over
 while line != '':
-    <code class="chunk_ref">@{continue if line begins with `#`; updating `start_gene_line` <a href="#9">9</a>}</code>
+    <code class="chunk_ref">@{process `#`-line, updating `start_gene_line` if necessary <a href="#9">9</a>}</code>
     # At this point we're at a tab-separated line,
     # a record corresponding to a gene.
-    <code class="chunk_ref">@{extract fields from line <a href="#10">10</a>}</code>
-    <code class="chunk_ref">@{output processed line; warn on error <a href="#11">11</a>}</code>
+    <code class="chunk_ref">@{extract fields from line <a href="#11">11</a>}</code>
+    <code class="chunk_ref">@{output processed line; warn on error <a href="#12">12</a>}</code>
 
-    line = gff_file.readline()
-    gff_line_number += 1 
+    <code class="chunk_ref">@{read next line <a href="#10">10</a>}</code>
 </pre><span class="usedin">Used in <a href="#2">2</a>.</span></div>
 
 
 <p>The only</p>
 
-<div class="codeblock"><span class="codeblock_name"><a id="9">9</a> {<strong>continue if line begins with `#`; updating `start_gene_line`</strong>} =</span>
+<div class="codeblock"><span class="codeblock_name"><a id="9">9</a> {<strong>process `#`-line, updating `start_gene_line` if necessary</strong>} =</span>
 
 <pre class="prettyprint language-python">
 if line[0] == '#':
@@ -239,13 +245,24 @@ if line[0] == '#':
     else:
         print(line, end="", file=out_file)
 
+    <code class="chunk_ref">@{read next line <a href="#10">10</a>}</code>
     continue
 </pre><span class="usedin">Used in <a href="#8">8</a>.</span></div>
 
 
 
 
-<div class="codeblock"><span class="codeblock_name"><a id="10">10</a> {<strong>extract fields from line</strong>} =</span>
+<div class="codeblock"><span class="codeblock_name"><a id="10">10</a> {<strong>read next line</strong>} =</span>
+
+<pre class="prettyprint language-python">
+line = gff_file.readline()
+gff_line_number += 1
+</pre><span class="usedin">Used in <a href="#8">8</a>, <a href="#9">9</a>.</span></div>
+
+
+
+
+<div class="codeblock"><span class="codeblock_name"><a id="11">11</a> {<strong>extract fields from line</strong>} =</span>
 
 <pre class="prettyprint language-python">
 split_line = line.rstrip().split('\t')
@@ -258,16 +275,18 @@ direction  = split_line[6]
 
 <h2></h2>
 
-<div class="codeblock"><span class="codeblock_name"><a id="11">11</a> {<strong>output processed line; warn on error</strong>} =</span>
+<div class="codeblock"><span class="codeblock_name"><a id="12">12</a> {<strong>output processed line; warn on error</strong>} =</span>
 
 <pre class="prettyprint language-python">
 if scaff_name in agp_dict:
     scaff_list = agp_dict[scaff_name]
     for [cn, cb, ce, sn, sb, se, dr] in scaff_list:
         if (scaff_beg >= sb) and (scaff_end <= se):
-            <code class="chunk_ref">@{update (and print) line and break out of loop <a href="#12">12</a>}</code>
+            <code class="chunk_ref">@{update (and print) line <a href="#13">13</a>}</code>
+            break
+
     else:
-        <code class="chunk_ref">@{warn of split gene and skip to the next gene in the scaffold <a href="#13">13</a>}</code>
+        <code class="chunk_ref">@{warn of split gene and skip to the next gene in the scaffold <a href="#14">14</a>}</code>
 else:
 
     if start_gene_line != '':
@@ -275,13 +294,13 @@ else:
         start_gene_line = ''
     print(line, end='\n', file=out_file)
 
-    <code class="chunk_ref">@{warn of missing scaffold in AGP file <a href="#14">14</a>}</code>
+    <code class="chunk_ref">@{warn of missing scaffold in AGP file <a href="#15">15</a>}</code>
 </pre><span class="usedin">Used in <a href="#8">8</a>.</span></div>
 
 
 
 
-<div class="codeblock"><span class="codeblock_name"><a id="12">12</a> {<strong>update (and print) line and break out of loop</strong>} =</span>
+<div class="codeblock"><span class="codeblock_name"><a id="13">13</a> {<strong>update (and print) line</strong>} =</span>
 
 <pre class="prettyprint language-python">
 split_line[0] = cn
@@ -302,14 +321,12 @@ if start_gene_line != '':
     print(start_gene_line, end='', file=out_file)
     start_gene_line = ''
 print('\t'.join(split_line), end='\n', file=out_file)
-
-break
-</pre><span class="usedin">Used in <a href="#11">11</a>.</span></div>
+</pre><span class="usedin">Used in <a href="#12">12</a>.</span></div>
 
 
 
 
-<div class="codeblock"><span class="codeblock_name"><a id="13">13</a> {<strong>warn of split gene and skip to the next gene in the scaffold</strong>} =</span>
+<div class="codeblock"><span class="codeblock_name"><a id="14">14</a> {<strong>warn of split gene and skip to the next gene in the scaffold</strong>} =</span>
 
 <pre class="prettyprint language-python">
 print("! l.%d  Warning: gene (%s) split in scaffold (%s)" %
@@ -320,16 +337,16 @@ while not line[0:12] == "# start gene":
     gff_line_number += 1
 
 continue
-</pre><span class="usedin">Used in <a href="#11">11</a>.</span></div>
+</pre><span class="usedin">Used in <a href="#12">12</a>.</span></div>
 
 
 
 
-<div class="codeblock"><span class="codeblock_name"><a id="14">14</a> {<strong>warn of missing scaffold in AGP file</strong>} =</span>
+<div class="codeblock"><span class="codeblock_name"><a id="15">15</a> {<strong>warn of missing scaffold in AGP file</strong>} =</span>
 
 <pre class="prettyprint language-python">
 print('l%4d of GFF file: could not find scaffold (%s) not found in AGP file (%s).' % (gff_line_number, scaff_name, agp_filename))
-</pre><span class="usedin">Used in <a href="#11">11</a>.</span></div>
+</pre><span class="usedin">Used in <a href="#12">12</a>.</span></div>
 
 
 <h1>License</h1>
@@ -341,127 +358,144 @@ licensed under GPL version 3.0 or later.</p>
 
 <ul>
 <li class="dict_letter">A<ul>
-<li>AGP: <a href="#14">14</a></li>
+<li>AGP: <a href="#15">15</a></li>
+<li>AGP_FILE: <a href="#3">3</a></li>
 <li>At: <a href="#8">8</a></li>
 </li></ul>
 <li class="dict_letter">G<ul>
-<li>GFF: <a href="#14">14</a></li>
+<li>GFF: <a href="#15">15</a></li>
+<li>GFF_FILE: <a href="#3">3</a></li>
+</li></ul>
+<li class="dict_letter">O<ul>
+<li>OUTPUT_FILE: <a href="#3">3</a></li>
+</li></ul>
+<li class="dict_letter">S<ul>
+<li>SystemExit: <a href="#3">3</a></li>
 </li></ul>
 <li class="dict_letter">W<ul>
-<li>Warning: <a href="#13">13</a></li>
+<li>Warning: <a href="#14">14</a></li>
+<li>Wrong: <a href="#3">3</a></li>
 </li></ul>
 <li class="dict_letter">A<ul>
-<li>agp_dict: <a href="#5">5</a>, <a href="#7">7</a>, <a href="#11">11</a></li>
+<li>agp_dict: <a href="#5">5</a>, <a href="#7">7</a>, <a href="#12">12</a></li>
 <li>agp_file: <a href="#2">2</a>, <a href="#5">5</a></li>
-<li>agp_filename: <a href="#2">2</a>, <a href="#3">3</a>, <a href="#14">14</a></li>
-<li>and: <a href="#5">5</a>, <a href="#10">10</a>, <a href="#11">11</a></li>
+<li>agp_filename: <a href="#2">2</a>, <a href="#3">3</a>, <a href="#15">15</a></li>
+<li>and: <a href="#5">5</a>, <a href="#11">11</a>, <a href="#12">12</a></li>
+<li>arguments: <a href="#3">3</a></li>
 <li>argv: <a href="#3">3</a></li>
 <li>as: <a href="#2">2</a></li>
 <li>at: <a href="#8">8</a></li>
 </li></ul>
 <li class="dict_letter">B<ul>
-<li>begin: <a href="#5">5</a>, <a href="#10">10</a></li>
+<li>begin: <a href="#5">5</a>, <a href="#11">11</a></li>
 <li>break: <a href="#12">12</a></li>
 </li></ul>
 <li class="dict_letter">C<ul>
-<li>cb: <a href="#11">11</a>, <a href="#12">12</a></li>
-<li>ce: <a href="#11">11</a>, <a href="#12">12</a></li>
+<li>cb: <a href="#12">12</a>, <a href="#13">13</a></li>
+<li>ce: <a href="#12">12</a>, <a href="#13">13</a></li>
 <li>chrom_beg: <a href="#5">5</a>, <a href="#7">7</a></li>
 <li>chrom_end: <a href="#5">5</a>, <a href="#7">7</a></li>
 <li>chrom_name: <a href="#5">5</a>, <a href="#7">7</a></li>
 <li>chromosome: <a href="#5">5</a></li>
-<li>cn: <a href="#11">11</a>, <a href="#12">12</a></li>
-<li>continue: <a href="#6">6</a>, <a href="#9">9</a>, <a href="#13">13</a></li>
+<li>cn: <a href="#12">12</a>, <a href="#13">13</a></li>
+<li>continue: <a href="#6">6</a>, <a href="#9">9</a>, <a href="#14">14</a></li>
 <li>corresponding: <a href="#8">8</a></li>
-<li>could: <a href="#14">14</a></li>
+<li>could: <a href="#15">15</a></li>
 </li></ul>
 <li class="dict_letter">D<ul>
-<li>direction: <a href="#5">5</a>, <a href="#7">7</a>, <a href="#10">10</a>, <a href="#12">12</a></li>
-<li>dr: <a href="#11">11</a>, <a href="#12">12</a></li>
+<li>direction: <a href="#5">5</a>, <a href="#7">7</a>, <a href="#11">11</a>, <a href="#13">13</a></li>
+<li>dr: <a href="#12">12</a>, <a href="#13">13</a></li>
 </li></ul>
 <li class="dict_letter">E<ul>
-<li>else: <a href="#7">7</a>, <a href="#9">9</a>, <a href="#11">11</a>, <a href="#12">12</a></li>
-<li>end: <a href="#5">5</a>, <a href="#9">9</a>, <a href="#10">10</a>, <a href="#11">11</a>, <a href="#12">12</a></li>
+<li>else: <a href="#7">7</a>, <a href="#9">9</a>, <a href="#12">12</a>, <a href="#13">13</a></li>
+<li>end: <a href="#5">5</a>, <a href="#9">9</a>, <a href="#11">11</a>, <a href="#12">12</a>, <a href="#13">13</a></li>
+<li>error: <a href="#3">3</a></li>
 </li></ul>
 <li class="dict_letter">F<ul>
-<li>file: <a href="#8">8</a>, <a href="#9">9</a>, <a href="#11">11</a>, <a href="#12">12</a>, <a href="#14">14</a></li>
-<li>find: <a href="#14">14</a></li>
-<li>for: <a href="#5">5</a>, <a href="#11">11</a></li>
-<li>found: <a href="#14">14</a></li>
+<li>file: <a href="#8">8</a>, <a href="#9">9</a>, <a href="#12">12</a>, <a href="#13">13</a>, <a href="#15">15</a></li>
+<li>find: <a href="#15">15</a></li>
+<li>for: <a href="#5">5</a>, <a href="#12">12</a></li>
+<li>found: <a href="#15">15</a></li>
 </li></ul>
 <li class="dict_letter">G<ul>
-<li>gene: <a href="#8">8</a>, <a href="#9">9</a>, <a href="#13">13</a></li>
-<li>gff_file: <a href="#2">2</a>, <a href="#8">8</a>, <a href="#13">13</a></li>
+<li>gene: <a href="#8">8</a>, <a href="#9">9</a>, <a href="#14">14</a></li>
+<li>gff_file: <a href="#2">2</a>, <a href="#8">8</a>, <a href="#10">10</a>, <a href="#14">14</a></li>
 <li>gff_filename: <a href="#2">2</a>, <a href="#3">3</a></li>
-<li>gff_line_number: <a href="#8">8</a>, <a href="#13">13</a>, <a href="#14">14</a></li>
+<li>gff_line_number: <a href="#8">8</a>, <a href="#10">10</a>, <a href="#14">14</a>, <a href="#15">15</a></li>
 </li></ul>
 <li class="dict_letter">I<ul>
-<li>if: <a href="#6">6</a>, <a href="#7">7</a>, <a href="#9">9</a>, <a href="#11">11</a>, <a href="#12">12</a></li>
+<li>if: <a href="#3">3</a>, <a href="#6">6</a>, <a href="#7">7</a>, <a href="#9">9</a>, <a href="#12">12</a>, <a href="#13">13</a></li>
 <li>import: <a href="#4">4</a></li>
-<li>in: <a href="#5">5</a>, <a href="#7">7</a>, <a href="#11">11</a>, <a href="#13">13</a>, <a href="#14">14</a></li>
-<li>int: <a href="#5">5</a>, <a href="#10">10</a></li>
+<li>in: <a href="#5">5</a>, <a href="#7">7</a>, <a href="#12">12</a>, <a href="#14">14</a>, <a href="#15">15</a></li>
+<li>int: <a href="#5">5</a>, <a href="#11">11</a></li>
 <li>is: <a href="#8">8</a></li>
 </li></ul>
 <li class="dict_letter">J<ul>
-<li>join: <a href="#12">12</a></li>
+<li>join: <a href="#13">13</a></li>
 </li></ul>
 <li class="dict_letter">L<ul>
-<li>line: <a href="#5">5</a>, <a href="#6">6</a>, <a href="#8">8</a>, <a href="#9">9</a>, <a href="#10">10</a>, <a href="#11">11</a>, <a href="#13">13</a></li>
+<li>len: <a href="#3">3</a></li>
+<li>line: <a href="#5">5</a>, <a href="#6">6</a>, <a href="#8">8</a>, <a href="#9">9</a>, <a href="#10">10</a>, <a href="#11">11</a>, <a href="#12">12</a>, <a href="#14">14</a></li>
 <li>loop: <a href="#8">8</a></li>
 </li></ul>
 <li class="dict_letter">N<ul>
 <li>new_record: <a href="#7">7</a></li>
-<li>not: <a href="#13">13</a>, <a href="#14">14</a></li>
+<li>not: <a href="#14">14</a>, <a href="#15">15</a></li>
+<li>number: <a href="#3">3</a></li>
 </li></ul>
 <li class="dict_letter">O<ul>
-<li>of: <a href="#14">14</a></li>
+<li>of: <a href="#3">3</a>, <a href="#15">15</a></li>
 <li>open: <a href="#2">2</a></li>
-<li>out_file: <a href="#2">2</a>, <a href="#9">9</a>, <a href="#11">11</a>, <a href="#12">12</a></li>
+<li>out_file: <a href="#2">2</a>, <a href="#9">9</a>, <a href="#12">12</a>, <a href="#13">13</a></li>
 <li>out_filename: <a href="#2">2</a>, <a href="#3">3</a></li>
 <li>over: <a href="#8">8</a></li>
 </li></ul>
 <li class="dict_letter">P<ul>
 <li>point: <a href="#8">8</a></li>
-<li>positions: <a href="#5">5</a>, <a href="#10">10</a></li>
-<li>print: <a href="#9">9</a>, <a href="#11">11</a>, <a href="#12">12</a>, <a href="#13">13</a>, <a href="#14">14</a></li>
+<li>positions: <a href="#5">5</a>, <a href="#11">11</a></li>
+<li>print: <a href="#3">3</a>, <a href="#9">9</a>, <a href="#12">12</a>, <a href="#13">13</a>, <a href="#14">14</a>, <a href="#15">15</a></li>
 </li></ul>
 <li class="dict_letter">R<ul>
+<li>raise: <a href="#3">3</a></li>
 <li>re: <a href="#8">8</a></li>
-<li>readline: <a href="#8">8</a>, <a href="#13">13</a></li>
+<li>readline: <a href="#8">8</a>, <a href="#10">10</a>, <a href="#14">14</a></li>
 <li>record: <a href="#8">8</a></li>
-<li>relative: <a href="#5">5</a>, <a href="#10">10</a></li>
-<li>rstrip: <a href="#6">6</a>, <a href="#10">10</a></li>
+<li>relative: <a href="#5">5</a>, <a href="#11">11</a></li>
+<li>rstrip: <a href="#6">6</a>, <a href="#11">11</a></li>
 </li></ul>
 <li class="dict_letter">S<ul>
-<li>sb: <a href="#11">11</a></li>
-<li>scaff_beg: <a href="#5">5</a>, <a href="#7">7</a>, <a href="#10">10</a>, <a href="#11">11</a>, <a href="#12">12</a></li>
-<li>scaff_end: <a href="#5">5</a>, <a href="#7">7</a>, <a href="#10">10</a>, <a href="#11">11</a>, <a href="#12">12</a></li>
-<li>scaff_list: <a href="#11">11</a></li>
-<li>scaff_name: <a href="#5">5</a>, <a href="#7">7</a>, <a href="#10">10</a>, <a href="#11">11</a>, <a href="#13">13</a>, <a href="#14">14</a></li>
-<li>scaffold: <a href="#5">5</a>, <a href="#10">10</a>, <a href="#13">13</a>, <a href="#14">14</a></li>
-<li>se: <a href="#11">11</a></li>
+<li>sb: <a href="#12">12</a></li>
+<li>scaff_beg: <a href="#5">5</a>, <a href="#7">7</a>, <a href="#11">11</a>, <a href="#12">12</a>, <a href="#13">13</a></li>
+<li>scaff_end: <a href="#5">5</a>, <a href="#7">7</a>, <a href="#11">11</a>, <a href="#12">12</a>, <a href="#13">13</a></li>
+<li>scaff_list: <a href="#12">12</a></li>
+<li>scaff_name: <a href="#5">5</a>, <a href="#7">7</a>, <a href="#11">11</a>, <a href="#12">12</a>, <a href="#14">14</a>, <a href="#15">15</a></li>
+<li>scaffold: <a href="#5">5</a>, <a href="#11">11</a>, <a href="#14">14</a>, <a href="#15">15</a></li>
+<li>script: <a href="#3">3</a></li>
+<li>se: <a href="#12">12</a></li>
 <li>separated: <a href="#8">8</a></li>
-<li>sn: <a href="#11">11</a></li>
-<li>split: <a href="#6">6</a>, <a href="#10">10</a>, <a href="#13">13</a></li>
-<li>split_line: <a href="#5">5</a>, <a href="#6">6</a>, <a href="#10">10</a>, <a href="#12">12</a>, <a href="#13">13</a></li>
-<li>start: <a href="#9">9</a>, <a href="#13">13</a></li>
-<li>start_gene_line: <a href="#8">8</a>, <a href="#9">9</a>, <a href="#11">11</a>, <a href="#12">12</a></li>
-<li>str: <a href="#12">12</a></li>
+<li>sn: <a href="#12">12</a></li>
+<li>split: <a href="#6">6</a>, <a href="#11">11</a>, <a href="#14">14</a></li>
+<li>split_line: <a href="#5">5</a>, <a href="#6">6</a>, <a href="#11">11</a>, <a href="#13">13</a>, <a href="#14">14</a></li>
+<li>start: <a href="#9">9</a>, <a href="#14">14</a></li>
+<li>start_gene_line: <a href="#8">8</a>, <a href="#9">9</a>, <a href="#12">12</a>, <a href="#13">13</a></li>
+<li>str: <a href="#13">13</a></li>
 <li>sys: <a href="#3">3</a>, <a href="#4">4</a></li>
 </li></ul>
 <li class="dict_letter">T<ul>
 <li>tab: <a href="#8">8</a></li>
-<li>the: <a href="#5">5</a>, <a href="#10">10</a></li>
+<li>the: <a href="#5">5</a>, <a href="#11">11</a></li>
 <li>this: <a href="#8">8</a></li>
-<li>to: <a href="#5">5</a>, <a href="#8">8</a>, <a href="#10">10</a></li>
+<li>to: <a href="#5">5</a>, <a href="#8">8</a>, <a href="#11">11</a></li>
 </li></ul>
 <li class="dict_letter">U<ul>
 <li>until: <a href="#8">8</a></li>
+<li>usage: <a href="#3">3</a></li>
 </li></ul>
 <li class="dict_letter">W<ul>
 <li>we: <a href="#8">8</a></li>
-<li>while: <a href="#8">8</a>, <a href="#13">13</a></li>
+<li>while: <a href="#8">8</a>, <a href="#14">14</a></li>
 <li>with: <a href="#2">2</a></li>
+<li>wrong: <a href="#3">3</a></li>
 </li></ul>
 <li class="dict_letter">Y<ul>
 <li>yes: <a href="#6">6</a></li>

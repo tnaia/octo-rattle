@@ -106,15 +106,24 @@ Here is the program outline.
 We open all files upfront, so we break sooner rather than later.
 
 ``` python read files and generate output
-with open(agp_filename, 'r') as agp_file:
-    with open(gff_filename, 'r') as gff_file:
-        with open(out_filename, 'w') as out_file:
+with open(gff_filename, 'r') as gff_file:
+    with open(out_filename, 'w') as out_file:
 
+        with open(agp_filename, 'r') as agp_file:
             @{process AGP file}
-            @{proces GFF file and generate output}
+
+        @{proces GFF file and generate output}
 ```
  
+It is **very** important check the number of arguments;
+`sys.argv` should contain the name of the script, and all the arguments which were passed.
+
 ``` python process arguments
+if len(sys.argv) != 4:
+    print('! error: wrong number of arguments.')
+    print('  usage: script AGP_FILE GFF_FILE OUTPUT_FILE')
+    raise SystemExit('Wrong number of arguments.')
+
 agp_filename = sys.argv[-3]
 gff_filename = sys.argv[-2]
 out_filename = sys.argv[-1]
@@ -171,26 +180,31 @@ gff_line_number = 1
 
 # loop until file is over
 while line != '':
-    @{continue if line begins with `#`; updating `start_gene_line`}
+    @{process `#`-line, updating `start_gene_line` if necessary}
     # At this point we're at a tab-separated line,
     # a record corresponding to a gene.
     @{extract fields from line}
     @{output processed line; warn on error}
 
-    line = gff_file.readline()
-    gff_line_number += 1 
+    @{read next line} 
 ```
 
 The only 
 
-``` python continue if line begins with `#`; updating `start_gene_line`
+``` python process `#`-line, updating `start_gene_line` if necessary
 if line[0] == '#':
     if line[:12] == '# start gene':
         start_gene_line = line
     else:
         print(line, end="", file=out_file)
 
+    @{read next line}
     continue
+```
+
+``` python read next line
+line = gff_file.readline()
+gff_line_number += 1
 ```
 
 ``` python extract fields from line
@@ -208,7 +222,9 @@ if scaff_name in agp_dict:
     scaff_list = agp_dict[scaff_name]
     for [cn, cb, ce, sn, sb, se, dr] in scaff_list:
         if (scaff_beg >= sb) and (scaff_end <= se):
-            @{update (and print) line and break out of loop}
+            @{update (and print) line}
+            break
+
     else:
         @{warn of split gene and skip to the next gene in the scaffold}
 else:
@@ -221,7 +237,7 @@ else:
     @{warn of missing scaffold in AGP file}
 ```
 
-``` python update (and print) line and break out of loop
+``` python update (and print) line
 split_line[0] = cn
 
 if dr == '+':
@@ -240,8 +256,6 @@ if start_gene_line != '':
     print(start_gene_line, end='', file=out_file)
     start_gene_line = ''
 print('\t'.join(split_line), end='\n', file=out_file)
-
-break
 ```
 
 ``` python warn of split gene and skip to the next gene in the scaffold
