@@ -129,9 +129,9 @@ with open(file, 'r') as input_file:
                     fence_length = match_fence.end()
                     j = fence_length
                     if fenced_with_language:
-                        while line[j] == ' ':
+                        while line[j] == ' ': # skip spaces before language specification
                             j += 1
-                        while line[j] != ' ':
+                        while line[j] != ' ': # skip language specification
                             j += 1
                     chunk_name = line[j+1:].strip()
                     chunk_line = line_number

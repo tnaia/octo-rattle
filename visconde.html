@@ -320,20 +320,20 @@ if not reading_code_chunk:
 
 <p>The chunk name is a stripped substring of the opening fence. If chunks
 do not have a language specification, then the chunk name is the
-(space-stripped) substring of line which goes from the last backtick
+(space-stripped) substring of <code>line</code> beginning after the last backtick
 of the fence until the end of the line; otherwise, it goes from the
-first space character and goes until the end of the line (we do this
-so that the fence can be followed immediately by a language
-specification).</p>
+first space following the language specification and goes until the
+end of the line (we do this so that the fence can be followed
+immediately by a language specification).</p>
 
 <div class="codeblock"><span class="codeblock_name"><a id="15">15</a> {<strong>set `chunk_name`</strong>}</span>
 
 <pre class="prettyprint language-python">
 j = fence_length
 if fenced_with_language:
-    while line[j] == ' ':
+    while line[j] == ' ': # skip spaces before language specification
         j += 1
-    while line[j] != ' ':
+    while line[j] != ' ': # skip language specification
         j += 1
 chunk_name = line[j+1:].strip()
 </pre><span class="usedin">Used in <a href="#14">14</a>.</span></div>
@@ -879,6 +879,7 @@ print(('<' +'li>%s: ' + links + '<' + '/li>') % w, file=output_file)
 <li class="dict_letter">B<ul>
 <li>banner: <a href="#1">1</a>, <a href="#2">2</a></li>
 <li>be: <a href="#26">26</a></li>
+<li>before: <a href="#15">15</a></li>
 <li>blk: <a href="#18">18</a>, <a href="#20">20</a>, <a href="#23">23</a></li>
 <li>block: <a href="#10">10</a>, <a href="#16">16</a>, <a href="#17">17</a>, <a href="#39">39</a>, <a href="#41">41</a></li>
 <li>block_counter: <a href="#10">10</a></li>
@@ -975,7 +976,7 @@ print(('<' +'li>%s: ' + links + '<' + '/li>') % w, file=output_file)
 <li>keys: <a href="#40">40</a></li>
 </li></ul>
 <li class="dict_letter">L<ul>
-<li>language: <a href="#4">4</a>, <a href="#33">33</a></li>
+<li>language: <a href="#4">4</a>, <a href="#15">15</a>, <a href="#33">33</a></li>
 <li>last_line_blank: <a href="#11">11</a>, <a href="#14">14</a>, <a href="#16">16</a>, <a href="#31">31</a>, <a href="#32">32</a>, <a href="#35">35</a></li>
 <li>len: <a href="#18">18</a>, <a href="#20">20</a>, <a href="#21">21</a>, <a href="#23">23</a>, <a href="#35">35</a></li>
 <li>li: <a href="#40">40</a>, <a href="#41">41</a></li>
@@ -1043,9 +1044,12 @@ print(('<' +'li>%s: ' + links + '<' + '/li>') % w, file=output_file)
 <li>seealso: <a href="#35">35</a></li>
 <li>self: <a href="#9">9</a>, <a href="#10">10</a></li>
 <li>set: <a href="#41">41</a></li>
+<li>skip: <a href="#15">15</a></li>
 <li>sorted: <a href="#40">40</a>, <a href="#41">41</a></li>
 <li>source: <a href="#4">4</a></li>
+<li>spaces: <a href="#15">15</a></li>
 <li>span: <a href="#33">33</a>, <a href="#35">35</a></li>
+<li>specification: <a href="#15">15</a></li>
 <li>start: <a href="#10">10</a></li>
 <li>store_true: <a href="#4">4</a></li>
 <li>strip: <a href="#14">14</a>, <a href="#15">15</a>, <a href="#22">22</a>, <a href="#27">27</a>, <a href="#32">32</a>, <a href="#33">33</a></li>
