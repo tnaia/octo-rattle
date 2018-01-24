@@ -64,11 +64,13 @@ call to <code>visconde</code> would look like this</p>
 
 <ul>
 <li><code>--fencedwithlanguage</code> first word (at the same line but) after opening fence treated as language of the code chunk</li>
-<li><code>--nofencedwithlanguage</code> text (at same line but) after opening fence treated as chunk name</li>
+<li><code>--nofencedwithlanguage</code> text (at same line but) after opening fence treated as chunk name (default)</li>
 <li><code>--manyoutputs</code> generate one output file per root chunk</li>
-<li><code>--nomanyoutputs</code> error (and no output files) if more than one root chunk</li>
+<li><code>--nomanyoutputs</code> error (and no output files) if more than one root chunk (default)</li>
 <li><code>--tangle</code> produce tangled outputs (default)</li>
 <li><code>--notangle</code> do not produce tangled outputs</li>
+<li><code>--weave</code> produce weaved output</li>
+<li><code>--noweave</code> do not produce weaved outputs (default)</li>
 <li><code>--markdownsections</code> use markdown headings (lines starting by up to six <code>#</code> characters) as section divisions (default, and currently only option)</li>
 <li><code>--index</code> produce word index (default)</li>
 <li><code>--noindex</code> no word index</li>
@@ -109,10 +111,16 @@ parser.add_argument(              "--tangle", action="store_true",
 parser.add_argument(            "--notangle", action="store_true", 
     help="do not produce tangled outputs")
 
+# weave ================================================================
+parser.add_argument(  "--weave", action="store_true", 
+    help="produce weaved output")
+parser.add_argument("--noweave", action="store_true", 
+    help="do not produce weaved output (default)")
+
 # index ================================================================
-parser.add_argument(               "--index", action="store_true", 
+parser.add_argument(               "--index", action="store_true",
     help="produce word index (default)")
-parser.add_argument(             "--noindex", action="store_true", 
+parser.add_argument(             "--noindex", action="store_true",
     help="do not produce word index")
 
 
@@ -151,32 +159,33 @@ file = args.file
 
 # flag (no)fencedwithlanguage ==========================================
 if args.fencedwithlanguage and args.nofencedwithlanguage:
-    print('! error: contradictory flags (fencedwithlanguage and nofencedwithlanguage)')
-    #todo abort
+    raise SystemExit('! error: contradictory flags (fencedwithlanguage and nofencedwithlanguage)')
 
 fenced_with_language = args.fencedwithlanguage
 
 
 # flag (no)manyoutputs =================================================
 if args.manyoutputs and args.nomanyoutputs:
-    print('! error: contradictory flags (manyoutputs and nomanyoutputs)')
-    #todo abort
+    raise SystemExit('! error: contradictory flags (manyoutputs and nomanyoutputs)')
 
 many_outpus = args.manyoutputs
 
 
 # flag (no)tangle ======================================================
 if args.tangle and args.notangle:
-    print('! error: contradictory flags (tangle and notangle)')
-    #todo abort
+    raise SystemExit('! error: contradictory flags (tangle and notangle)')
 
 tangle = not args.notangle
 
+# flag (no)weave =======================================================
+if args.weave and args.noweave:
+    raise SystemExit('! error: contradictory flags (weave and noweave)')
+
+weave = args.weave
 
 # flag (no)index =======================================================
 if args.index and args.noindex:
-    print('! error: contradictory flags (index and noindex)')
-    #todo abort
+    raise SystemExit('! error: contradictory flags (index and noindex)')
 
 index = not args.noindex
 </pre><span class="usedin">Used in <a href="#3">3</a>.</span></div>
@@ -394,10 +403,7 @@ else:
 <div class="codeblock"><span class="codeblock_name"><a id="19">19</a> {<strong>error: too many root chunks</strong>}</span>
 
 <pre class="prettyprint language-python">
-print('! error: too many root chunks')
-print('  -----  chunk list:')
-print(root_chunks)
-#todo: abort
+raise SystemExit('! error: too many root chunks\n  -----  chunk list:' + ','.join(root_chunks))
 </pre><span class="usedin">Used in <a href="#18">18</a>.</span></div>
 
 
@@ -792,12 +798,12 @@ print('<' + 'ul>', file=output_file)
 for w in sorted(word_dict.keys()):
     if w[0] != first_letter:
         if first_letter != ' ':
-            print('<' + '/li><' +'/ul>', file=output_file)            
+            print('<' + '/li><' +'/ul>', file=output_file)
         print(('<' +'li class="dict_letter">%c<' + 'ul>') % w[0].upper(), file=output_file)
         first_letter = w[0]
 
     <code class="chunk_ref">@{print cross-reference links to blocks where `w` occurs}</code>
-    
+
 print('<' + '/ul><' + '/ul>', file=output_file)
 </pre><span class="usedin">Used in <a href="#38">38</a>.</span></div>
 
@@ -837,6 +843,9 @@ print(('<' +'li>%s: ' + links + '<' + '/li>') % w, file=output_file)
 <li class="dict_letter">L<ul>
 <li>Lines: <a href="#10">10</a></li>
 </li></ul>
+<li class="dict_letter">S<ul>
+<li>SystemExit: <a href="#7">7</a>, <a href="#19">19</a></li>
+</li></ul>
 <li class="dict_letter">T<ul>
 <li>This: <a href="#1">1</a></li>
 <li>True: <a href="#8">8</a>, <a href="#14">14</a>, <a href="#32">32</a></li>
@@ -855,7 +864,6 @@ print(('<' +'li>%s: ' + links + '<' + '/li>') % w, file=output_file)
 <li>Za: <a href="#37">37</a></li>
 </li></ul>
 <li class="dict_letter">A<ul>
-<li>abort: <a href="#7">7</a>, <a href="#19">19</a></li>
 <li>action: <a href="#4">4</a></li>
 <li>add_argument: <a href="#4">4</a></li>
 <li>add_indent: <a href="#25">25</a>, <a href="#27">27</a></li>
@@ -960,7 +968,7 @@ print(('<' +'li>%s: ' + links + '<' + '/li>') % w, file=output_file)
 <li>items: <a href="#20">20</a></li>
 </li></ul>
 <li class="dict_letter">J<ul>
-<li>join: <a href="#21">21</a>, <a href="#34">34</a>, <a href="#35">35</a>, <a href="#41">41</a></li>
+<li>join: <a href="#19">19</a>, <a href="#21">21</a>, <a href="#34">34</a>, <a href="#35">35</a>, <a href="#41">41</a></li>
 </li></ul>
 <li class="dict_letter">K<ul>
 <li>kept: <a href="#26">26</a></li>
@@ -995,6 +1003,7 @@ print(('<' +'li>%s: ' + links + '<' + '/li>') % w, file=output_file)
 <li>nomanyoutputs: <a href="#4">4</a>, <a href="#7">7</a></li>
 <li>not: <a href="#4">4</a>, <a href="#7">7</a>, <a href="#14">14</a>, <a href="#16">16</a>, <a href="#18">18</a>, <a href="#20">20</a>, <a href="#24">24</a>, <a href="#32">32</a>, <a href="#39">39</a></li>
 <li>notangle: <a href="#4">4</a>, <a href="#7">7</a></li>
+<li>noweave: <a href="#4">4</a>, <a href="#7">7</a></li>
 </li></ul>
 <li class="dict_letter">O<ul>
 <li>of: <a href="#9">9</a>, <a href="#10">10</a>, <a href="#11">11</a></li>
@@ -1016,10 +1025,11 @@ print(('<' +'li>%s: ' + links + '<' + '/li>') % w, file=output_file)
 <li>per: <a href="#4">4</a></li>
 <li>pre: <a href="#33">33</a></li>
 <li>prettyprint: <a href="#33">33</a></li>
-<li>print: <a href="#2">2</a>, <a href="#7">7</a>, <a href="#19">19</a>, <a href="#20">20</a>, <a href="#21">21</a>, <a href="#23">23</a>, <a href="#24">24</a>, <a href="#26">26</a>, <a href="#28">28</a>, <a href="#29">29</a>, <a href="#30">30</a>, <a href="#32">32</a>, <a href="#35">35</a>, <a href="#36">36</a>, <a href="#40">40</a>, <a href="#41">41</a></li>
+<li>print: <a href="#2">2</a>, <a href="#20">20</a>, <a href="#21">21</a>, <a href="#23">23</a>, <a href="#24">24</a>, <a href="#26">26</a>, <a href="#28">28</a>, <a href="#29">29</a>, <a href="#30">30</a>, <a href="#32">32</a>, <a href="#35">35</a>, <a href="#36">36</a>, <a href="#40">40</a>, <a href="#41">41</a></li>
 <li>produce: <a href="#4">4</a></li>
 </li></ul>
 <li class="dict_letter">R<ul>
+<li>raise: <a href="#7">7</a>, <a href="#19">19</a></li>
 <li>re: <a href="#12">12</a>, <a href="#13">13</a>, <a href="#25">25</a>, <a href="#35">35</a>, <a href="#39">39</a></li>
 <li>reading_code_chunk: <a href="#11">11</a>, <a href="#14">14</a>, <a href="#16">16</a>, <a href="#31">31</a>, <a href="#32">32</a>, <a href="#35">35</a></li>
 <li>reference: <a href="#24">24</a>, <a href="#26">26</a></li>
@@ -1046,7 +1056,7 @@ print(('<' +'li>%s: ' + links + '<' + '/li>') % w, file=output_file)
 <li>tangled: <a href="#4">4</a></li>
 <li>text: <a href="#4">4</a></li>
 <li>the: <a href="#4">4</a></li>
-<li>todo: <a href="#7">7</a>, <a href="#19">19</a>, <a href="#21">21</a></li>
+<li>todo: <a href="#21">21</a></li>
 <li>too: <a href="#19">19</a></li>
 </li></ul>
 <li class="dict_letter">U<ul>
@@ -1063,6 +1073,8 @@ print(('<' +'li>%s: ' + links + '<' + '/li>') % w, file=output_file)
 <li class="dict_letter">W<ul>
 <li>warning: <a href="#21">21</a>, <a href="#26">26</a></li>
 <li>was: <a href="#21">21</a></li>
+<li>weave: <a href="#4">4</a>, <a href="#7">7</a></li>
+<li>weaved: <a href="#4">4</a></li>
 <li>while: <a href="#15">15</a>, <a href="#23">23</a>, <a href="#33">33</a>, <a href="#36">36</a></li>
 <li>will: <a href="#26">26</a></li>
 <li>with: <a href="#9">9</a>, <a href="#11">11</a>, <a href="#23">23</a>, <a href="#28">28</a></li>

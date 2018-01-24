@@ -51,11 +51,13 @@ call to `visconde` would look like this
 Where `OPTIONS` can be one or more of the following.
 
 - `--fencedwithlanguage` first word (at the same line but) after opening fence treated as language of the code chunk
-- `--nofencedwithlanguage` text (at same line but) after opening fence treated as chunk name
+- `--nofencedwithlanguage` text (at same line but) after opening fence treated as chunk name (default)
 - `--manyoutputs` generate one output file per root chunk
-- `--nomanyoutputs` error (and no output files) if more than one root chunk
+- `--nomanyoutputs` error (and no output files) if more than one root chunk (default)
 - `--tangle` produce tangled outputs (default)
 - `--notangle` do not produce tangled outputs
+- `--weave` produce weaved output
+- `--noweave` do not produce weaved outputs (default)
 - `--markdownsections` use markdown headings (lines starting by up to six `#` characters) as section divisions (default, and currently only option)
 - `--index` produce word index (default)
 - `--noindex` no word index
@@ -90,6 +92,12 @@ parser.add_argument(              "--tangle", action="store_true",
 parser.add_argument(            "--notangle", action="store_true", 
     help="do not produce tangled outputs")
 
+# weave ================================================================
+parser.add_argument(  "--weave", action="store_true", 
+    help="produce weaved output")
+parser.add_argument("--noweave", action="store_true", 
+    help="do not produce weaved output (default)")
+
 # index ================================================================
 parser.add_argument(               "--index", action="store_true",
     help="produce word index (default)")
@@ -119,32 +127,33 @@ file = args.file
 
 # flag (no)fencedwithlanguage ==========================================
 if args.fencedwithlanguage and args.nofencedwithlanguage:
-    print('! error: contradictory flags (fencedwithlanguage and nofencedwithlanguage)')
-    #todo abort
+    raise SystemExit('! error: contradictory flags (fencedwithlanguage and nofencedwithlanguage)')
 
 fenced_with_language = args.fencedwithlanguage
 
 
 # flag (no)manyoutputs =================================================
 if args.manyoutputs and args.nomanyoutputs:
-    print('! error: contradictory flags (manyoutputs and nomanyoutputs)')
-    #todo abort
+    raise SystemExit('! error: contradictory flags (manyoutputs and nomanyoutputs)')
 
 many_outpus = args.manyoutputs
 
 
 # flag (no)tangle ======================================================
 if args.tangle and args.notangle:
-    print('! error: contradictory flags (tangle and notangle)')
-    #todo abort
+    raise SystemExit('! error: contradictory flags (tangle and notangle)')
 
 tangle = not args.notangle
 
+# flag (no)weave =======================================================
+if args.weave and args.noweave:
+    raise SystemExit('! error: contradictory flags (weave and noweave)')
+
+weave = args.weave
 
 # flag (no)index =======================================================
 if args.index and args.noindex:
-    print('! error: contradictory flags (index and noindex)')
-    #todo abort
+    raise SystemExit('! error: contradictory flags (index and noindex)')
 
 index = not args.noindex
 ```
@@ -318,10 +327,7 @@ else:
 ```
 
 ``` python error: too many root chunks
-print('! error: too many root chunks')
-print('  -----  chunk list:')
-print(root_chunks)
-#todo: abort
+raise SystemExit('! error: too many root chunks\n  -----  chunk list:' + ','.join(root_chunks))
 ```
 
 The dictionary `used_at` stores a list of chunks which refer to any

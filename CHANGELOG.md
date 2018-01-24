@@ -1,5 +1,10 @@
 # Changes to visconde
 
+## v 0.1.7
+
+- Better exiting through `raise SystemExit`
+- Weave flag (default `--noweave`)
+
 ## v 0.1.6
 
 - Index words in code blocks, print word index with hyperlinks to

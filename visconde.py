@@ -59,6 +59,12 @@ parser.add_argument(              "--tangle", action="store_true",
 parser.add_argument(            "--notangle", action="store_true", 
     help="do not produce tangled outputs")
 
+# weave ================================================================
+parser.add_argument(  "--weave", action="store_true", 
+    help="produce weaved output")
+parser.add_argument("--noweave", action="store_true", 
+    help="do not produce weaved output (default)")
+
 # index ================================================================
 parser.add_argument(               "--index", action="store_true",
     help="produce word index (default)")
@@ -74,32 +80,33 @@ file = args.file
 
 # flag (no)fencedwithlanguage ==========================================
 if args.fencedwithlanguage and args.nofencedwithlanguage:
-    print('! error: contradictory flags (fencedwithlanguage and nofencedwithlanguage)')
-    #todo abort
+    raise SystemExit('! error: contradictory flags (fencedwithlanguage and nofencedwithlanguage)')
 
 fenced_with_language = args.fencedwithlanguage
 
 
 # flag (no)manyoutputs =================================================
 if args.manyoutputs and args.nomanyoutputs:
-    print('! error: contradictory flags (manyoutputs and nomanyoutputs)')
-    #todo abort
+    raise SystemExit('! error: contradictory flags (manyoutputs and nomanyoutputs)')
 
 many_outpus = args.manyoutputs
 
 
 # flag (no)tangle ======================================================
 if args.tangle and args.notangle:
-    print('! error: contradictory flags (tangle and notangle)')
-    #todo abort
+    raise SystemExit('! error: contradictory flags (tangle and notangle)')
 
 tangle = not args.notangle
 
+# flag (no)weave =======================================================
+if args.weave and args.noweave:
+    raise SystemExit('! error: contradictory flags (weave and noweave)')
+
+weave = args.weave
 
 # flag (no)index =======================================================
 if args.index and args.noindex:
-    print('! error: contradictory flags (index and noindex)')
-    #todo abort
+    raise SystemExit('! error: contradictory flags (index and noindex)')
 
 index = not args.noindex
 
@@ -169,10 +176,7 @@ else:
     #todo: it's alright if no tangle option was chosen
 
 if tangle and (not many_outpus) and (len(root_chunks) > 1):
-    print('! error: too many root chunks')
-    print('  -----  chunk list:')
-    print(root_chunks)
-    #todo: abort
+    raise SystemExit('! error: too many root chunks\n  -----  chunk list:' + ','.join(root_chunks))
 else:
     for blk in root_chunks:
         print("Writing file %s...    " % blk,end='')
