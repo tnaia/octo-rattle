@@ -50,6 +50,7 @@ call to `visconde` would look like this
     
 Where `OPTIONS` can be one or more of the following.
 
+- `--dry-run` write no files, but output warnings
 - `--fencedwithlanguage` first word (at the same line but) after opening fence treated as language of the code chunk
 - `--nofencedwithlanguage` text (at same line but) after opening fence treated as chunk name (default)
 - `--manyoutputs` generate one output file per root chunk
@@ -73,6 +74,10 @@ All flags appear in pairs.
 ``` python build argument parser
 # file =================================================================
 parser.add_argument("file", help="literate source file")
+
+# dry-run ==============================================================
+parser.add_argument(  "--dry-run", action="store_true", 
+    help="write no files, but output warnings", dest='dry_run')
 
 # fencedwithlanguage ===================================================
 parser.add_argument(  "--fencedwithlanguage", action="store_true", 
@@ -124,6 +129,8 @@ It is time to enforce the default behaviour for each pair of flags
 # input file ===========================================================
 file = args.file
 
+# flag dry-run =========================================================
+dry_run = args.dry_run
 
 # flag (no)fencedwithlanguage ==========================================
 if args.fencedwithlanguage and args.nofencedwithlanguage:
@@ -169,6 +176,7 @@ many_outpus = False
 tangle = True
 weave = False
 index = True
+dry_run = False
 ```
 
 
@@ -398,14 +406,16 @@ consider `chunk[c]` the reference, verbatim; we also issue a warning.
 
 
 ``` python write `blk` to a file
-print("Writing file %s...    " % blk,end='')
-with open(blk, 'w') as output:
-    buffer = [l for b in chunk[blk].blocks for l in b.lines]
-    i = 0
-    while i < len(buffer):
-        @{output tangled line}
-        
-print("[ DONE ]")
+if not dry_run:
+    print("Writing file %s...    " % blk,end='')
+
+    with open(blk, 'w') as output:
+        buffer = [l for b in chunk[blk].blocks for l in b.lines]
+        i = 0
+        while i < len(buffer):
+            @{output tangled line}
+
+    print("[ DONE ]")
 ```
 
 Lines are either output verbatim or (if line is a valid chunk reference)
@@ -417,12 +427,14 @@ if is_chunk_line(buffer[i]):
     if chunk_name not in chunk:
         @{warn of undefined chunk}
 
-        print(buffer[i], file=output, end='') # insert reference verbatim
+        if not dry_run:
+            print(buffer[i], file=output, end='') # insert reference verbatim
         i += 1
     else:
         @{add contents of chunk to buffer}
 else:
-    print(buffer[i], file=output, end='')
+    if not dry_run:
+        print(buffer[i], file=output, end='')
     i += 1
 ```
 
@@ -470,13 +482,15 @@ passed through markdown. They fall in three categories:
 if weave:
     with open(file, 'r') as input_file:
         out_filename = file + '.md'
-        print("Writing file %s... " % out_filename,end='')
+        if not dry_run:
+            print("Writing file %s... " % out_filename,end='')
         with open(out_filename, 'w') as output_file:
             @{output html header}
             @{weave source}
             @{prepare and output word index}
             @{output html tail}
-        print("[ DONE ]")
+        if not dry_run:
+            print("[ DONE ]")
 ```
 
 We provide a mechanism for inserting stuff before (header) and after
@@ -485,12 +499,14 @@ We provide a mechanism for inserting stuff before (header) and after
 ``` python output html header
 html_header = ''
 
-print(html_header, file=output_file, end='\n')
+if not dry_run:
+    print(html_header, file=output_file, end='\n')
 ```
 
 ``` python output html tail
 html_tail = ''
-print(html_tail, file=output_file, end='')
+if not dry_run:
+    print(html_tail, file=output_file, end='')
 ```
 
 Weaving the source code is **mostly** echoing lines, keeping track of
@@ -521,7 +537,8 @@ chunks (i.e., chunks containing references to this one) and a closing
 ```python print line if not in code chunk; process code chunk fence
 if not reading_code_chunk:
     if line.strip() == "":
-        print(line,file=output_file, end='')
+        if not dry_run:
+            print(line,file=output_file, end='')
         last_line_blank = True
         continue
     elif last_line_blank:
@@ -530,14 +547,17 @@ if not reading_code_chunk:
             fence_length = match_fence.end()
             code_block_counter += 1
             @{assemble `code_chunk_header`}
-            print(code_chunk_header, file=output_file)
+            if not dry_run:
+                print(code_chunk_header, file=output_file)
             reading_code_chunk = True
 
         else:
-            print(line,file=output_file, end='')
+            if not dry_run:
+                print(line,file=output_file, end='')
             last_line_blank = False
     else:
-        print(line, file=output_file, end='')
+        if not dry_run:
+            print(line, file=output_file, end='')
 
     continue
 ```
@@ -587,8 +607,8 @@ if match_fence and match_fence.end() == fence_length:
     if len(used_at[chunk_name]) > 0:
         seealso = '<' + 'span class="usedin">Used in ' + ', '.join([(('<' + 'a href="#%d">%d<' +'/a>') % (id,id)) for c,id,i in used_at[chunk_name]]) + '.<' + '/span>'
 
-    
-    print('<'+'/p'+'re>' + other_blocks + seealso +'<'+'/div>', file=output_file)
+    if not dry_run:
+        print('<'+'/p'+'re>' + other_blocks + seealso +'<'+'/div>', file=output_file)
 
 
     reading_code_chunk = False
@@ -618,7 +638,8 @@ if is_chunk_line(line):
         j +=1
     line = ' '*j + '<' + 'code class="chunk_ref">@{' + n + ' <' + (('a href="#%d">%d<' + '/a>') % (r,r)) +  '}<' + '/code>\n'
 
-print(line, file=output_file, end='')
+if not dry_run:
+    print(line, file=output_file, end='')
 ```
 
 ## Word index
@@ -657,22 +678,27 @@ for i,b in enumerate(block):
 
 ``` python output word index
 first_letter = ' '
-print("## Word index\n\n", file=output_file)
-print('<' + 'ul>', file=output_file)
+if not dry_run:
+    print("## Word index\n\n", file=output_file)
+    print('<' + 'ul>', file=output_file)
 
 for w in sorted(word_dict.keys()):
     if w[0] != first_letter:
         if first_letter != ' ':
-            print('<' + '/li><' +'/ul>', file=output_file)
-        print(('<' +'li class="dict_letter">%c<' + 'ul>') % w[0].upper(), file=output_file)
+            if not dry_run:
+                print('<' + '/li><' +'/ul>', file=output_file)
+        if not dry_run:
+            print(('<' +'li class="dict_letter">%c<' + 'ul>') % w[0].upper(), file=output_file)
         first_letter = w[0]
 
     @{print cross-reference links to blocks where `w` occurs}
 
-print('<' + '/ul><' + '/ul>', file=output_file)
+if not dry_run:
+    print('<' + '/ul><' + '/ul>', file=output_file)
 ```
 
 ``` python print cross-reference links to blocks where `w` occurs
 links = ', '.join([('<'+ 'a href="#%d">%d<' + '/a>') % (block[j].id,block[j].id) for j in list(sorted(set(word_dict[w])))])
-print(('<' +'li>%s: ' + links + '<' + '/li>') % w, file=output_file)
+if not dry_run:
+    print(('<' +'li>%s: ' + links + '<' + '/li>') % w, file=output_file)
 ```

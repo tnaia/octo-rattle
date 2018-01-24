@@ -9,6 +9,7 @@ many_outpus = False
 tangle = True
 weave = False
 index = True
+dry_run = False
 class Chunk:
     '''Collection of blocks with same name'''
     
@@ -41,6 +42,10 @@ word_reg = '[A-Za-z][A-Za-z0-9_]+'
 
 # file =================================================================
 parser.add_argument("file", help="literate source file")
+
+# dry-run ==============================================================
+parser.add_argument(  "--dry-run", action="store_true", 
+    help="write no files, but output warnings", dest='dry_run')
 
 # fencedwithlanguage ===================================================
 parser.add_argument(  "--fencedwithlanguage", action="store_true", 
@@ -78,6 +83,8 @@ args = parser.parse_args()
 # input file ===========================================================
 file = args.file
 
+# flag dry-run =========================================================
+dry_run = args.dry_run
 
 # flag (no)fencedwithlanguage ==========================================
 if args.fencedwithlanguage and args.nofencedwithlanguage:
@@ -180,36 +187,42 @@ if tangle and (not many_outpus) and (len(root_chunks) > 1):
     raise SystemExit('! error: too many root chunks\n  -----  chunk list:' + ','.join(root_chunks))
 else:
     for blk in root_chunks:
-        print("Writing file %s...    " % blk,end='')
-        with open(blk, 'w') as output:
-            buffer = [l for b in chunk[blk].blocks for l in b.lines]
-            i = 0
-            while i < len(buffer):
-                if is_chunk_line(buffer[i]):
-                    chunk_name = chunk_line_name(buffer[i])
-                    if chunk_name not in chunk:
-                        print("! warning: undefined chunk; reference will be kept verbatim: %s" % chunk_name)
-                
-                        print(buffer[i], file=output, end='') # insert reference verbatim
-                        i += 1
+        if not dry_run:
+            print("Writing file %s...    " % blk,end='')
+        
+            with open(blk, 'w') as output:
+                buffer = [l for b in chunk[blk].blocks for l in b.lines]
+                i = 0
+                while i < len(buffer):
+                    if is_chunk_line(buffer[i]):
+                        chunk_name = chunk_line_name(buffer[i])
+                        if chunk_name not in chunk:
+                            print("! warning: undefined chunk; reference will be kept verbatim: %s" % chunk_name)
+                    
+                            if not dry_run:
+                                print(buffer[i], file=output, end='') # insert reference verbatim
+                            i += 1
+                        else:
+                            indent = re.compile(' *').match(buffer[i]).end()
+                            ind_lns = [x for b in chunk[chunk_name].blocks for x in add_indent(indent, b.lines)]
+                            buffer = ind_lns + buffer[i+1:]
+                            i = 0
                     else:
-                        indent = re.compile(' *').match(buffer[i]).end()
-                        ind_lns = [x for b in chunk[chunk_name].blocks for x in add_indent(indent, b.lines)]
-                        buffer = ind_lns + buffer[i+1:]
-                        i = 0
-                else:
-                    print(buffer[i], file=output, end='')
-                    i += 1
-                
-        print("[ DONE ]")
+                        if not dry_run:
+                            print(buffer[i], file=output, end='')
+                        i += 1
+        
+            print("[ DONE ]")
 if weave:
     with open(file, 'r') as input_file:
         out_filename = file + '.md'
-        print("Writing file %s... " % out_filename,end='')
+        if not dry_run:
+            print("Writing file %s... " % out_filename,end='')
         with open(out_filename, 'w') as output_file:
             html_header = ''
             
-            print(html_header, file=output_file, end='\n')
+            if not dry_run:
+                print(html_header, file=output_file, end='\n')
             reading_code_chunk = False
             last_line_blank = False
             chunk_name = '' # current chunk name (when reading_code_chunk == True)
@@ -218,7 +231,8 @@ if weave:
             for line_number, line in enumerate(input_file):
                 if not reading_code_chunk:
                     if line.strip() == "":
-                        print(line,file=output_file, end='')
+                        if not dry_run:
+                            print(line,file=output_file, end='')
                         last_line_blank = True
                         continue
                     elif last_line_blank:
@@ -250,14 +264,17 @@ if weave:
                             else:
                                 chunk_name = line[fence_length:].strip()
                                 code_chunk_header = '<' +'div class="codeblock"><'+'span class="codeblock_name">{<'+'strong>' + chunk_name + '<'+'/strong>}<'+'/span>\n\n<'+'pre class="prettyprint">'
-                            print(code_chunk_header, file=output_file)
+                            if not dry_run:
+                                print(code_chunk_header, file=output_file)
                             reading_code_chunk = True
                 
                         else:
-                            print(line,file=output_file, end='')
+                            if not dry_run:
+                                print(line,file=output_file, end='')
                             last_line_blank = False
                     else:
-                        print(line, file=output_file, end='')
+                        if not dry_run:
+                            print(line, file=output_file, end='')
                 
                     continue
                 match_fence = fence_regexp.match(line)
@@ -271,8 +288,8 @@ if weave:
                     if len(used_at[chunk_name]) > 0:
                         seealso = '<' + 'span class="usedin">Used in ' + ', '.join([(('<' + 'a href="#%d">%d<' +'/a>') % (id,id)) for c,id,i in used_at[chunk_name]]) + '.<' + '/span>'
                 
-                    
-                    print('<'+'/p'+'re>' + other_blocks + seealso +'<'+'/div>', file=output_file)
+                    if not dry_run:
+                        print('<'+'/p'+'re>' + other_blocks + seealso +'<'+'/div>', file=output_file)
                 
                 
                     reading_code_chunk = False
@@ -286,7 +303,8 @@ if weave:
                             j +=1
                         line = ' '*j + '<' + 'code class="chunk_ref">@{' + n + ' <' + (('a href="#%d">%d<' + '/a>') % (r,r)) +  '}<' + '/code>\n'
                     
-                    print(line, file=output_file, end='')
+                    if not dry_run:
+                        print(line, file=output_file, end='')
             
             if index:
                 word_dict = {}
@@ -303,20 +321,27 @@ if weave:
                         else:
                             word_dict[w] += [i]
                 first_letter = ' '
-                print("## Word index\n\n", file=output_file)
-                print('<' + 'ul>', file=output_file)
+                if not dry_run:
+                    print("## Word index\n\n", file=output_file)
+                    print('<' + 'ul>', file=output_file)
                 
                 for w in sorted(word_dict.keys()):
                     if w[0] != first_letter:
                         if first_letter != ' ':
-                            print('<' + '/li><' +'/ul>', file=output_file)
-                        print(('<' +'li class="dict_letter">%c<' + 'ul>') % w[0].upper(), file=output_file)
+                            if not dry_run:
+                                print('<' + '/li><' +'/ul>', file=output_file)
+                        if not dry_run:
+                            print(('<' +'li class="dict_letter">%c<' + 'ul>') % w[0].upper(), file=output_file)
                         first_letter = w[0]
                 
                     links = ', '.join([('<'+ 'a href="#%d">%d<' + '/a>') % (block[j].id,block[j].id) for j in list(sorted(set(word_dict[w])))])
-                    print(('<' +'li>%s: ' + links + '<' + '/li>') % w, file=output_file)
+                    if not dry_run:
+                        print(('<' +'li>%s: ' + links + '<' + '/li>') % w, file=output_file)
                 
-                print('<' + '/ul><' + '/ul>', file=output_file)
+                if not dry_run:
+                    print('<' + '/ul><' + '/ul>', file=output_file)
             html_tail = ''
-            print(html_tail, file=output_file, end='')
-        print("[ DONE ]")
+            if not dry_run:
+                print(html_tail, file=output_file, end='')
+        if not dry_run:
+            print("[ DONE ]")

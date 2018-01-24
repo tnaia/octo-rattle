@@ -63,6 +63,7 @@ call to <code>visconde</code> would look like this</p>
 <p>Where <code>OPTIONS</code> can be one or more of the following.</p>
 
 <ul>
+<li><code>--dry-run</code> write no files, but output warnings</li>
 <li><code>--fencedwithlanguage</code> first word (at the same line but) after opening fence treated as language of the code chunk</li>
 <li><code>--nofencedwithlanguage</code> text (at same line but) after opening fence treated as chunk name (default)</li>
 <li><code>--manyoutputs</code> generate one output file per root chunk</li>
@@ -92,6 +93,10 @@ call to <code>visconde</code> would look like this</p>
 <pre class="prettyprint language-python">
 # file =================================================================
 parser.add_argument("file", help="literate source file")
+
+# dry-run ==============================================================
+parser.add_argument(  "--dry-run", action="store_true", 
+    help="write no files, but output warnings", dest='dry_run')
 
 # fencedwithlanguage ===================================================
 parser.add_argument(  "--fencedwithlanguage", action="store_true", 
@@ -156,6 +161,8 @@ import argparse
 # input file ===========================================================
 file = args.file
 
+# flag dry-run =========================================================
+dry_run = args.dry_run
 
 # flag (no)fencedwithlanguage ==========================================
 if args.fencedwithlanguage and args.nofencedwithlanguage:
@@ -204,6 +211,7 @@ many_outpus = False
 tangle = True
 weave = False
 index = True
+dry_run = False
 </pre><span class="seealso">See also <a href="#1">1</a>, <a href="#5">5</a>, 8, <a href="#9">9</a>, <a href="#10">10</a>, <a href="#12">12</a>, <a href="#17">17</a>, <a href="#22">22</a>, <a href="#27">27</a>, <a href="#38">38</a>.</span><span class="usedin">Used in <a href="#2">2</a>.</span></div>
 
 
@@ -489,14 +497,16 @@ consider <code>chunk[c]</code> the reference, verbatim; we also issue a warning.
 <div class="codeblock"><span class="codeblock_name"><a id="23">23</a> {<strong>write `blk` to a file</strong>} =</span>
 
 <pre class="prettyprint language-python">
-print("Writing file %s...    " % blk,end='')
-with open(blk, 'w') as output:
-    buffer = [l for b in chunk[blk].blocks for l in b.lines]
-    i = 0
-    while i < len(buffer):
-        <code class="chunk_ref">@{output tangled line <a href="#24">24</a>}</code>
-        
-print("[ DONE ]")
+if not dry_run:
+    print("Writing file %s...    " % blk,end='')
+
+    with open(blk, 'w') as output:
+        buffer = [l for b in chunk[blk].blocks for l in b.lines]
+        i = 0
+        while i < len(buffer):
+            <code class="chunk_ref">@{output tangled line <a href="#24">24</a>}</code>
+
+    print("[ DONE ]")
 </pre><span class="usedin">Used in <a href="#18">18</a>.</span></div>
 
 
@@ -511,12 +521,14 @@ if is_chunk_line(buffer[i]):
     if chunk_name not in chunk:
         <code class="chunk_ref">@{warn of undefined chunk <a href="#26">26</a>}</code>
 
-        print(buffer[i], file=output, end='') # insert reference verbatim
+        if not dry_run:
+            print(buffer[i], file=output, end='') # insert reference verbatim
         i += 1
     else:
         <code class="chunk_ref">@{add contents of chunk to buffer <a href="#25">25</a>}</code>
 else:
-    print(buffer[i], file=output, end='')
+    if not dry_run:
+        print(buffer[i], file=output, end='')
     i += 1
 </pre><span class="usedin">Used in <a href="#23">23</a>.</span></div>
 
@@ -582,13 +594,15 @@ preceding the code chunk).</li>
 if weave:
     with open(file, 'r') as input_file:
         out_filename = file + '.md'
-        print("Writing file %s... " % out_filename,end='')
+        if not dry_run:
+            print("Writing file %s... " % out_filename,end='')
         with open(out_filename, 'w') as output_file:
             <code class="chunk_ref">@{output html header <a href="#29">29</a>}</code>
             <code class="chunk_ref">@{weave source <a href="#31">31</a>}</code>
             <code class="chunk_ref">@{prepare and output word index <a href="#39">39</a>}</code>
             <code class="chunk_ref">@{output html tail <a href="#30">30</a>}</code>
-        print("[ DONE ]")
+        if not dry_run:
+            print("[ DONE ]")
 </pre><span class="usedin">Used in <a href="#2">2</a>.</span></div>
 
 
@@ -600,7 +614,8 @@ if weave:
 <pre class="prettyprint language-python">
 html_header = ''
 
-print(html_header, file=output_file, end='\n')
+if not dry_run:
+    print(html_header, file=output_file, end='\n')
 </pre><span class="usedin">Used in <a href="#28">28</a>.</span></div>
 
 
@@ -610,7 +625,8 @@ print(html_header, file=output_file, end='\n')
 
 <pre class="prettyprint language-python">
 html_tail = ''
-print(html_tail, file=output_file, end='')
+if not dry_run:
+    print(html_tail, file=output_file, end='')
 </pre><span class="usedin">Used in <a href="#28">28</a>.</span></div>
 
 
@@ -647,7 +663,8 @@ chunks (i.e., chunks containing references to this one) and a closing
 <pre class="prettyprint language-python">
 if not reading_code_chunk:
     if line.strip() == "":
-        print(line,file=output_file, end='')
+        if not dry_run:
+            print(line,file=output_file, end='')
         last_line_blank = True
         continue
     elif last_line_blank:
@@ -656,14 +673,17 @@ if not reading_code_chunk:
             fence_length = match_fence.end()
             code_block_counter += 1
             <code class="chunk_ref">@{assemble `code_chunk_header` <a href="#33">33</a>}</code>
-            print(code_chunk_header, file=output_file)
+            if not dry_run:
+                print(code_chunk_header, file=output_file)
             reading_code_chunk = True
 
         else:
-            print(line,file=output_file, end='')
+            if not dry_run:
+                print(line,file=output_file, end='')
             last_line_blank = False
     else:
-        print(line, file=output_file, end='')
+        if not dry_run:
+            print(line, file=output_file, end='')
 
     continue
 </pre><span class="usedin">Used in <a href="#31">31</a>.</span></div>
@@ -724,8 +744,8 @@ if match_fence and match_fence.end() == fence_length:
     if len(used_at[chunk_name]) > 0:
         seealso = '<' + 'span class="usedin">Used in ' + ', '.join([(('<' + 'a href="#%d">%d<' +'/a>') % (id,id)) for c,id,i in used_at[chunk_name]]) + '.<' + '/span>'
 
-    
-    print('<'+'/p'+'re>' + other_blocks + seealso +'<'+'/div>', file=output_file)
+    if not dry_run:
+        print('<'+'/p'+'re>' + other_blocks + seealso +'<'+'/div>', file=output_file)
 
 
     reading_code_chunk = False
@@ -761,7 +781,8 @@ if is_chunk_line(line):
         j +=1
     line = ' '*j + '<' + 'code class="chunk_ref">@{' + n + ' <' + (('a href="#%d">%d<' + '/a>') % (r,r)) +  '}<' + '/code>\n'
 
-print(line, file=output_file, end='')
+if not dry_run:
+    print(line, file=output_file, end='')
 </pre><span class="usedin">Used in <a href="#35">35</a>.</span></div>
 
 
@@ -816,19 +837,23 @@ for i,b in enumerate(block):
 
 <pre class="prettyprint language-python">
 first_letter = ' '
-print("## Word index\n\n", file=output_file)
-print('<' + 'ul>', file=output_file)
+if not dry_run:
+    print("## Word index\n\n", file=output_file)
+    print('<' + 'ul>', file=output_file)
 
 for w in sorted(word_dict.keys()):
     if w[0] != first_letter:
         if first_letter != ' ':
-            print('<' + '/li><' +'/ul>', file=output_file)
-        print(('<' +'li class="dict_letter">%c<' + 'ul>') % w[0].upper(), file=output_file)
+            if not dry_run:
+                print('<' + '/li><' +'/ul>', file=output_file)
+        if not dry_run:
+            print(('<' +'li class="dict_letter">%c<' + 'ul>') % w[0].upper(), file=output_file)
         first_letter = w[0]
 
     <code class="chunk_ref">@{print cross-reference links to blocks where `w` occurs <a href="#42">42</a>}</code>
 
-print('<' + '/ul><' + '/ul>', file=output_file)
+if not dry_run:
+    print('<' + '/ul><' + '/ul>', file=output_file)
 </pre><span class="usedin">Used in <a href="#39">39</a>.</span></div>
 
 
@@ -838,7 +863,8 @@ print('<' + '/ul><' + '/ul>', file=output_file)
 
 <pre class="prettyprint language-python">
 links = ', '.join([('<'+ 'a href="#%d">%d<' + '/a>') % (block[j].id,block[j].id) for j in list(sorted(set(word_dict[w])))])
-print(('<' +'li>%s: ' + links + '<' + '/li>') % w, file=output_file)
+if not dry_run:
+    print(('<' +'li>%s: ' + links + '<' + '/li>') % w, file=output_file)
 </pre><span class="usedin">Used in <a href="#41">41</a>.</span></div>
 
 
@@ -913,6 +939,7 @@ print(('<' +'li>%s: ' + links + '<' + '/li>') % w, file=output_file)
 <li>block_lines: <a href="#10">10</a>, <a href="#11">11</a>, <a href="#14">14</a>, <a href="#16">16</a></li>
 <li>blocks: <a href="#9">9</a>, <a href="#16">16</a>, <a href="#17">17</a>, <a href="#20">20</a>, <a href="#23">23</a>, <a href="#25">25</a>, <a href="#34">34</a>, <a href="#36">36</a>, <a href="#37">37</a></li>
 <li>buffer: <a href="#23">23</a>, <a href="#24">24</a>, <a href="#25">25</a></li>
+<li>but: <a href="#4">4</a></li>
 </li></ul>
 <li class="dict_letter">C<ul>
 <li>cannot: <a href="#21">21</a></li>
@@ -942,10 +969,13 @@ print(('<' +'li>%s: ' + links + '<' + '/li>') % w, file=output_file)
 <li class="dict_letter">D<ul>
 <li>def: <a href="#9">9</a>, <a href="#10">10</a>, <a href="#22">22</a>, <a href="#27">27</a></li>
 <li>default: <a href="#4">4</a></li>
+<li>dest: <a href="#4">4</a></li>
 <li>dict: <a href="#20">20</a></li>
 <li>dict_letter: <a href="#41">41</a></li>
 <li>div: <a href="#33">33</a>, <a href="#34">34</a>, <a href="#35">35</a></li>
 <li>do: <a href="#4">4</a></li>
+<li>dry: <a href="#4">4</a>, <a href="#7">7</a></li>
+<li>dry_run: <a href="#4">4</a>, <a href="#7">7</a>, <a href="#8">8</a>, <a href="#23">23</a>, <a href="#24">24</a>, <a href="#28">28</a>, <a href="#29">29</a>, <a href="#30">30</a>, <a href="#32">32</a>, <a href="#35">35</a>, <a href="#37">37</a>, <a href="#41">41</a>, <a href="#42">42</a></li>
 </li></ul>
 <li class="dict_letter">E<ul>
 <li>elif: <a href="#14">14</a>, <a href="#21">21</a>, <a href="#32">32</a></li>
@@ -962,6 +992,7 @@ print(('<' +'li>%s: ' + links + '<' + '/li>') % w, file=output_file)
 <li>fenced_with_language: <a href="#7">7</a>, <a href="#8">8</a>, <a href="#15">15</a>, <a href="#33">33</a></li>
 <li>fencedwithlanguage: <a href="#4">4</a>, <a href="#7">7</a></li>
 <li>file: <a href="#4">4</a>, <a href="#7">7</a>, <a href="#8">8</a>, <a href="#11">11</a>, <a href="#23">23</a>, <a href="#24">24</a>, <a href="#28">28</a>, <a href="#29">29</a>, <a href="#30">30</a>, <a href="#32">32</a>, <a href="#35">35</a>, <a href="#37">37</a>, <a href="#41">41</a>, <a href="#42">42</a></li>
+<li>files: <a href="#4">4</a></li>
 <li>find: <a href="#21">21</a></li>
 <li>findall: <a href="#40">40</a></li>
 <li>first: <a href="#4">4</a>, <a href="#37">37</a></li>
@@ -981,7 +1012,7 @@ print(('<' +'li>%s: ' + links + '<' + '/li>') % w, file=output_file)
 </li></ul>
 <li class="dict_letter">I<ul>
 <li>id: <a href="#10">10</a>, <a href="#20">20</a>, <a href="#34">34</a>, <a href="#35">35</a>, <a href="#36">36</a>, <a href="#37">37</a>, <a href="#42">42</a></li>
-<li>if: <a href="#7">7</a>, <a href="#14">14</a>, <a href="#15">15</a>, <a href="#16">16</a>, <a href="#18">18</a>, <a href="#20">20</a>, <a href="#21">21</a>, <a href="#22">22</a>, <a href="#24">24</a>, <a href="#28">28</a>, <a href="#32">32</a>, <a href="#33">33</a>, <a href="#34">34</a>, <a href="#35">35</a>, <a href="#36">36</a>, <a href="#37">37</a>, <a href="#39">39</a>, <a href="#40">40</a>, <a href="#41">41</a></li>
+<li>if: <a href="#7">7</a>, <a href="#14">14</a>, <a href="#15">15</a>, <a href="#16">16</a>, <a href="#18">18</a>, <a href="#20">20</a>, <a href="#21">21</a>, <a href="#22">22</a>, <a href="#23">23</a>, <a href="#24">24</a>, <a href="#28">28</a>, <a href="#29">29</a>, <a href="#30">30</a>, <a href="#32">32</a>, <a href="#33">33</a>, <a href="#34">34</a>, <a href="#35">35</a>, <a href="#36">36</a>, <a href="#37">37</a>, <a href="#39">39</a>, <a href="#40">40</a>, <a href="#41">41</a>, <a href="#42">42</a></li>
 <li>import: <a href="#6">6</a>, <a href="#13">13</a></li>
 <li>in: <a href="#11">11</a>, <a href="#16">16</a>, <a href="#18">18</a>, <a href="#20">20</a>, <a href="#21">21</a>, <a href="#22">22</a>, <a href="#23">23</a>, <a href="#24">24</a>, <a href="#25">25</a>, <a href="#27">27</a>, <a href="#31">31</a>, <a href="#35">35</a>, <a href="#36">36</a>, <a href="#40">40</a>, <a href="#41">41</a>, <a href="#42">42</a></li>
 <li>ind_lns: <a href="#25">25</a></li>
@@ -1027,11 +1058,11 @@ print(('<' +'li>%s: ' + links + '<' + '/li>') % w, file=output_file)
 <li class="dict_letter">N<ul>
 <li>name: <a href="#4">4</a>, <a href="#9">9</a>, <a href="#31">31</a></li>
 <li>new_block: <a href="#16">16</a></li>
-<li>no: <a href="#7">7</a>, <a href="#21">21</a></li>
+<li>no: <a href="#4">4</a>, <a href="#7">7</a>, <a href="#21">21</a></li>
 <li>nofencedwithlanguage: <a href="#4">4</a>, <a href="#7">7</a></li>
 <li>noindex: <a href="#4">4</a>, <a href="#7">7</a></li>
 <li>nomanyoutputs: <a href="#4">4</a>, <a href="#7">7</a></li>
-<li>not: <a href="#4">4</a>, <a href="#7">7</a>, <a href="#14">14</a>, <a href="#16">16</a>, <a href="#18">18</a>, <a href="#20">20</a>, <a href="#24">24</a>, <a href="#32">32</a>, <a href="#40">40</a></li>
+<li>not: <a href="#4">4</a>, <a href="#7">7</a>, <a href="#14">14</a>, <a href="#16">16</a>, <a href="#18">18</a>, <a href="#20">20</a>, <a href="#23">23</a>, <a href="#24">24</a>, <a href="#28">28</a>, <a href="#29">29</a>, <a href="#30">30</a>, <a href="#32">32</a>, <a href="#35">35</a>, <a href="#37">37</a>, <a href="#40">40</a>, <a href="#41">41</a>, <a href="#42">42</a></li>
 <li>notangle: <a href="#4">4</a>, <a href="#7">7</a></li>
 <li>noweave: <a href="#4">4</a>, <a href="#7">7</a></li>
 </li></ul>
@@ -1070,6 +1101,7 @@ print(('<' +'li>%s: ' + links + '<' + '/li>') % w, file=output_file)
 <li>return: <a href="#22">22</a>, <a href="#27">27</a></li>
 <li>root: <a href="#4">4</a>, <a href="#19">19</a>, <a href="#21">21</a></li>
 <li>root_chunks: <a href="#18">18</a>, <a href="#19">19</a>, <a href="#20">20</a>, <a href="#21">21</a></li>
+<li>run: <a href="#4">4</a>, <a href="#7">7</a></li>
 </li></ul>
 <li class="dict_letter">S<ul>
 <li>same: <a href="#9">9</a></li>
@@ -1109,6 +1141,7 @@ print(('<' +'li>%s: ' + links + '<' + '/li>') % w, file=output_file)
 </li></ul>
 <li class="dict_letter">W<ul>
 <li>warning: <a href="#21">21</a>, <a href="#26">26</a></li>
+<li>warnings: <a href="#4">4</a></li>
 <li>was: <a href="#21">21</a></li>
 <li>weave: <a href="#4">4</a>, <a href="#7">7</a>, <a href="#8">8</a>, <a href="#28">28</a></li>
 <li>weaved: <a href="#4">4</a></li>
@@ -1121,6 +1154,7 @@ print(('<' +'li>%s: ' + links + '<' + '/li>') % w, file=output_file)
 <li>word_dict: <a href="#39">39</a>, <a href="#40">40</a>, <a href="#41">41</a>, <a href="#42">42</a></li>
 <li>word_reg: <a href="#38">38</a>, <a href="#40">40</a></li>
 <li>words: <a href="#40">40</a></li>
+<li>write: <a href="#4">4</a></li>
 </li></ul>
 <li class="dict_letter">Z<ul>
 <li>z0: <a href="#38">38</a></li>
