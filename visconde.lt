@@ -21,7 +21,7 @@ breaks).
 The line below should be updated whenever this program is changed.
 
 ``` python global definitions
-banner = "This is VISCONDE version 0.1.6."
+banner = "This is VISCONDE version 0.1.7."
 ```
 
 Here is the program outline.
@@ -167,6 +167,7 @@ file = ""
 fenced_with_language = False
 many_outpus = False
 tangle = True
+weave = False
 index = True
 ```
 
@@ -466,15 +467,16 @@ passed through markdown. They fall in three categories:
 3.  Wrap the span above and the code in divs.
 
 ``` python output weaved file
-with open(file, 'r') as input_file:
-    out_filename = file + '.md'
-    print("Writing file %s... " % out_filename,end='')
-    with open(out_filename, 'w') as output_file:
-        @{output html header}
-        @{weave source}
-        @{prepare and output word index}
-        @{output html tail}
-    print("[ DONE ]")
+if weave:
+    with open(file, 'r') as input_file:
+        out_filename = file + '.md'
+        print("Writing file %s... " % out_filename,end='')
+        with open(out_filename, 'w') as output_file:
+            @{output html header}
+            @{weave source}
+            @{prepare and output word index}
+            @{output html tail}
+        print("[ DONE ]")
 ```
 
 We provide a mechanism for inserting stuff before (header) and after
@@ -501,7 +503,7 @@ has been used at.
 ``` python weave source
 reading_code_chunk = False
 last_line_blank = False
-chunk_name = ''
+chunk_name = '' # current chunk name (when reading_code_chunk == True)
 code_block_counter = 0
 
 for line_number, line in enumerate(input_file):
@@ -556,30 +558,37 @@ if fenced_with_language:
     chunk_id = code_block_counter
     chunk_language = line[chunk_lang_begin:j]
 
-    @{set `other_blocks` as hyperlinked references to all blocks with the same name}
-    code_chunk_header = '<' +'div class="codeblock"><'+ 'span class="codeblock_name"><'+('a id="%d">%d<' % (chunk_id,chunk_id))+'/a> {<'+'strong>' + chunk_name + '<'+'/strong>' + other_blocks + '}<'+'/span>\n\n<'+'pre class="prettyprint language-' + chunk_language +'">'
+    @{set `code_chunk_header`}
+
 else:
     chunk_name = line[fence_length:].strip()
     code_chunk_header = '<' +'div class="codeblock"><'+'span class="codeblock_name">{<'+'strong>' + chunk_name + '<'+'/strong>}<'+'/span>\n\n<'+'pre class="prettyprint">'
 ```
 
-``` python set `other_blocks` as hyperlinked references to all blocks with the same name
-other_blocks = ', '.join([('<'+ 'a href="#%d">%d<' + '/a>') % (b.id,b.id) for b in chunk[chunk_name].blocks if b.id != chunk_id])
-if other_blocks != '':
-    other_blocks = ' ' + other_blocks
+
+``` python set `code_chunk_header`
+open_div_span = '<' +'div class="codeblock"><'+ 'span class="codeblock_name">'
+block_id_anchor = '<'+('a id="%d">%d<' % (chunk_id,chunk_id)) +'/a>'
+weaved_chunk_name = ' {<'+'strong>' + chunk_name + '<'+'/strong>}'
+
+equals = ' =' if chunk_id == chunk[chunk_name].blocks[0].id else ' +='
+
+open_pre = '<' + '/span>\n\n<'+'pre class="prettyprint language-' + chunk_language +'">'
+
+code_chunk_header = open_div_span + block_id_anchor + weaved_chunk_name + equals + open_pre
 ```
 
 
-    
 ``` python echo code text and add closing div after closing fence
 match_fence = fence_regexp.match(line)
 if match_fence and match_fence.end() == fence_length:
+    @{set `other_blocks` as hyperlinked references to all blocks with the same name}
     seealso = ''
     if len(used_at[chunk_name]) > 0:
         seealso = '<' + 'span class="usedin">Used in ' + ', '.join([(('<' + 'a href="#%d">%d<' +'/a>') % (id,id)) for c,id,i in used_at[chunk_name]]) + '.<' + '/span>'
 
     
-    print('<'+'/p'+'re>' + seealso +'<'+'/div>', file=output_file)
+    print('<'+'/p'+'re>' + other_blocks + seealso +'<'+'/div>', file=output_file)
 
 
     reading_code_chunk = False
@@ -588,15 +597,26 @@ else:
     @{output weaved code line}
 ```
 
+``` python set `other_blocks` as hyperlinked references to all blocks with the same name
+other_blocks = ', '.join([('<'+ 'a href="#%d">%d<' + '/a>') % (b.id,b.id) if b.id != chunk_id else '%d' % b.id for b in chunk[chunk_name].blocks])
+if len(chunk[chunk_name].blocks) > 1:
+    other_blocks  = '<' + 'span class="seealso">See also ' + other_blocks + '.<' + '/span>'
+else:
+    other_blocks = ''
+```
+
+
 
 The only syntax highlighting we do is for code chunk references.
 
 ``` python output weaved code line
 if is_chunk_line(line):
+    n = chunk_line_name(line)
+    r = chunk[n].blocks[0].id # reference to first occurence of block
     j = 0
     while line[j] != '@':
         j +=1
-    line = ' '*j + '<' + 'code class="chunk_ref">@{' + chunk_line_name(line) + '}<' + '/code>\n'
+    line = ' '*j + '<' + 'code class="chunk_ref">@{' + n + ' <' + (('a href="#%d">%d<' + '/a>') % (r,r)) +  '}<' + '/code>\n'
 
 print(line, file=output_file, end='')
 ```

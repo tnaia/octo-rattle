@@ -4,6 +4,9 @@
 
 - Better exiting through `raise SystemExit`
 - Weave flag (default `--noweave`)
+- hyperlinks in code block references inside of code block
+- placed "see also" and "used in" block cross-references at end of code block
+- add '=' or '+=' after each code block name (in code block header)
 
 ## v 0.1.6
 
