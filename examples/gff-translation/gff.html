@@ -1,0 +1,470 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>GFF processor</title>
+<link href="gff.css" type="text/css" rel="stylesheet">
+</head><body>
+<h1>GFF processing</h1>
+
+<p>This is a literate python script to processes GFF files,
+combining the information with that of an AGP file.
+(See copyright note at the end of this file.)
+It receives as arguments paths to</p>
+
+<ul>
+<li>an AGP file,</li>
+<li>a GFF file, and</li>
+<li>an output file.</li>
+</ul>
+
+
+<h2>More details</h2>
+
+<p>In an AGP file, each line (other then the header) describes either</p>
+
+<ul>
+<li>a chromosome inside of some scaffold</li>
+<li>a gap in the scaffold</li>
+</ul>
+
+
+<p>Here is a sample from the first lines of an AGP file.</p>
+
+<pre><code>##agp-version   2.0
+# Format: object object_beg object_end part_number  W  component_id component_beg component_end  orientation
+#   Gaps: object object_beg object_end part_number  N  gap_length    gap_type       linkage
+lg1 1   163002  1   W   nRsb347.2.0.scaf00004   1   163002  -
+lg1 163003  163102  2   U   100 scaffold    yes map
+lg1 163103  1173791 3   W   nRsb347.2.0.scaf00012   1   1010689 -
+lg1 1173792 1173891 4   U   100 scaffold    yes map
+lg1 1173892 1943698 5   W   nRsb347.2.0.scaf00020   1   769807  -
+lg1 1943699 1943798 6   U   100 scaffold    yes map
+lg1 1943799 2602982 7   W   nRsb347.2.0.scaf00024   1   659184  -
+lg1 2602983 2603082 8   U   100 scaffold    yes map
+lg1 2603083 3201891 9   W   nRsb347.2.0.scaf00027   1   598809  -
+lg1 3201892 3201991 10  U   100 scaffold    yes map
+lg1 3201992 3735152 11  W   nRsb347.2.0.scaf00030   1   533161  -
+lg1 3735153 3735252 12  U   100 scaffold    yes map
+</code></pre>
+
+<p>For instance, in the file above, positions 1 to 163002 of chromosome &lsquo;lg1&rsquo;
+correspond to positions 1 to 163002 of scaffold &lsquo;nRsb347.2.0.scaf00004&rsquo;.</p>
+
+<p>Now the GFF file contains information about which genes lie in each scaffold.
+Each gene is represented by a series of lines in the GFF file, so the lines
+corresponding to gene <code>XXX</code> go from the line <code># start gene XXX</code> to the line
+<code># end gene XXX</code>.</p>
+
+<pre><code>##gff-version 3
+# This output was generated with AUGUSTUS (version 3.0.3).
+# AUGUSTUS is a gene prediction tool for eukaryotes written by Mario Stanke (mario.stanke@uni-greifswald.de),
+# Oliver Keller, Stefanie König and Lizzy Gerischer.
+# Please cite: Mario Stanke, Mark Diekhans, Robert Baertsch, David Haussler (2008),
+# Using native and syntenically mapped cDNA alignments to improve de novo gene finding
+# Bioinformatics 24: 637-644, doi 10.1093/bioinformatics/btn013
+# Sources of extrinsic information: M E
+# reading in the file ../../hints/hints.gff ...
+# Have extrinsic information about 263 sequences (in the specified range).
+# Initialising the parameters using config directory /exports/software/augustus/augustus-3.0.3/config/ ...
+# Rsb version. Using default transition matrix.
+# admissible start codons and their probabilities: ATG(0.998), CTG(0.000815), TTG(0.0013)
+# start gene g1
+nRsb347.2.0.scaf00001   AUGUSTUS    gene    6504    8593    0.11    +   .   ID=g1
+nRsb347.2.0.scaf00001   AUGUSTUS    transcript  6504    8593    0.11    +   .   ID=g1.t1;Parent=g1;Name=hypothetical protein Y032_0445g1585 [Ancylostoma ceylanicum];Alias=SPIN-1 [Caenorhabditis elegans] &amp;gt;gi|3874275|emb|CAB07311.1| SPIN-1 [Caenorhabditis elegans];Note=protein spinster -like protein 1
+nRsb347.2.0.scaf00001   AUGUSTUS    start_codon 6504    6506    .   +   0   Parent=g1.t1,g1
+nRsb347.2.0.scaf00001   AUGUSTUS    initial 6504    6624    0.75    +   0   Parent=g1.t1,g1
+nRsb347.2.0.scaf00001   AUGUSTUS    internal    6676    6796    1   +   2   Parent=g1.t1,g1
+nRsb347.2.0.scaf00001   AUGUSTUS    internal    6842    6923    0.99    +   1   Parent=g1.t1,g1
+nRsb347.2.0.scaf00001   AUGUSTUS    internal    6967    7118    1   +   0   Parent=g1.t1,g1
+nRsb347.2.0.scaf00001   AUGUSTUS    internal    7162    7244    1   +   1   Parent=g1.t1,g1
+nRsb347.2.0.scaf00001   AUGUSTUS    internal    7287    7422    0.58    +   2   Parent=g1.t1,g1
+nRsb347.2.0.scaf00001   AUGUSTUS    internal    7477    7629    0.58    +   1   Parent=g1.t1,g1
+
+[ . . . ommited lines . . . ]
+
+nRsb347.2.0.scaf00001   AUGUSTUS    CDS 8408    8593    0.6 +   0   Parent=g1.t1,g1
+nRsb347.2.0.scaf00001   AUGUSTUS    stop_codon  8591    8593    .   +   0   Parent=g1.t1,g1
+# protein sequence = [MVPLNTSKNIDEKSGFARYAPILIFTTINLLNYMDRYTVAGVLDQIQNYYHIDDAMGGLIQTMFMAFYIVFSPTAGFL
+# GDRYNRKWIMVIGITLWVIIVLASSFVPSNLFPVFLVLRGLVGVGEASYAIICPSVIADMYTGVWRSRMLMVFYFATPVGSGLGFIVGSAVSSWLGSW
+# KWGVRITCVFGVICILLIILFVEEPERGAAEREIGHIKAEVKNSGYLKDLWELCKNPTYITSSLGYTALVFGVGTLSWWMPTAIERKDAWKKGLNSTS
+# ELSTDATDRINLYFGMITLVAGLLGVTMGTLISNLMSNGIKVICFKIKTKRSDAIICCVGAIIGIPTMLIGIWAITDHMILCWIMLFICCTALSFNWS
+# TNVDMLMSVVIPSRRNTANAFQILLSHLLGDGSGPYVLGAISDALQGGNKSVQSQFQALQKSFYLADIVLVLGAVLFGVSAFTVVRDQQKFAEEMGEE
+# HCS]
+# Evidence for and against this transcript:
+# % of transcript supported by hints (any source): 0
+# CDS exons: 0/12
+# CDS introns: 0/11
+# 5'UTR exons and introns: 0/0
+# 3'UTR exons and introns: 0/0
+# hint groups fully obeyed: 0
+# incompatible hint groups: 0
+# end gene g1
+# start gene g2
+nRsb347.2.0.scaf00001   AUGUSTUS    gene    9008    11343   0.78    -   .   ID=g2
+nRsb347.2.0.scaf00001   AUGUSTUS    transcript  9008    11343   0.78    -   .   ID=g2.t1;Parent=g2;Name=hypothetical protein ANCDUO_22561 [Ancylostoma duodenale];Alias=Hypothetical protein CBG05511 [Caenorhabditis briggsae] &amp;gt;gi|187035053|emb|CAP25980.1| Protein CBG05511 [Caenorhabditis briggsae];Note=pua domain containing protein
+nRsb347.2.0.scaf00001   AUGUSTUS    stop_codon  9008    9010    .   -   0   Parent=g2.t1,g2
+nRsb347.2.0.scaf00001   AUGUSTUS    terminal    9008    9145    0.99    -   0   Parent=g2.t1,g2
+</code></pre>
+
+<p>Here is the program outline.</p>
+
+<div class="codeblock"><span class="codeblock_name"><a id="1">1</a> {<strong>gff.py</strong>} =</span>
+
+<pre class="prettyprint language-python">
+<code class="chunk_ref">@{imports <a href="#4">4</a>}</code>
+<code class="chunk_ref">@{process arguments <a href="#3">3</a>}</code>
+
+<code class="chunk_ref">@{read files and generate output <a href="#2">2</a>}</code>
+</pre></div>
+
+
+<p>We open all files upfront, so we break sooner rather than later.</p>
+
+<div class="codeblock"><span class="codeblock_name"><a id="2">2</a> {<strong>read files and generate output</strong>} =</span>
+
+<pre class="prettyprint language-python">
+with open(agp_filename, 'r') as agp_file:
+    with open(gff_filename, 'r') as gff_file:
+        with open(out_filename, 'w') as out_file:
+
+            <code class="chunk_ref">@{process AGP file <a href="#5">5</a>}</code>
+            <code class="chunk_ref">@{proces GFF file and generate output <a href="#8">8</a>}</code>
+</pre><span class="usedin">Used in <a href="#1">1</a>.</span></div>
+
+
+
+
+<div class="codeblock"><span class="codeblock_name"><a id="3">3</a> {<strong>process arguments</strong>} =</span>
+
+<pre class="prettyprint language-python">
+agp_filename = sys.argv[-3]
+gff_filename = sys.argv[-2]
+out_filename = sys.argv[-1]
+</pre><span class="usedin">Used in <a href="#1">1</a>.</span></div>
+
+
+
+
+<div class="codeblock"><span class="codeblock_name"><a id="4">4</a> {<strong>imports</strong>} =</span>
+
+<pre class="prettyprint language-python">
+import sys
+</pre><span class="usedin">Used in <a href="#1">1</a>.</span></div>
+
+
+
+
+<div class="codeblock"><span class="codeblock_name"><a id="5">5</a> {<strong>process AGP file</strong>} =</span>
+
+<pre class="prettyprint language-python">
+agp_dict = {}
+
+for line in agp_file:
+    <code class="chunk_ref">@{set `split_line`; continue if header or gap line <a href="#6">6</a>}</code>
+
+    chrom_name = split_line[0]
+    chrom_beg  = int(split_line[1]) # begin and end positions,
+    chrom_end  = int(split_line[2]) # relative to the chromosome
+    scaff_name = split_line[5]
+    scaff_beg  = int(split_line[6]) # begin and end positions,
+    scaff_end  = int(split_line[7]) # relative to the scaffold
+    direction  = split_line[8]
+
+    <code class="chunk_ref">@{store fields in `agp_dict` <a href="#7">7</a>}</code>
+</pre><span class="usedin">Used in <a href="#2">2</a>.</span></div>
+
+
+
+
+<div class="codeblock"><span class="codeblock_name"><a id="6">6</a> {<strong>set `split_line`; continue if header or gap line</strong>} =</span>
+
+<pre class="prettyprint language-python">
+if line[0] == '#':
+    continue
+
+split_line = line.rstrip().split('\t')
+
+if split_line[7] == 'yes':
+    continue
+</pre><span class="usedin">Used in <a href="#5">5</a>.</span></div>
+
+
+
+
+<div class="codeblock"><span class="codeblock_name"><a id="7">7</a> {<strong>store fields in `agp_dict`</strong>} =</span>
+
+<pre class="prettyprint language-python">
+new_record = [[chrom_name, chrom_beg, chrom_end, scaff_name, scaff_beg, scaff_end, direction]]
+if scaff_name in agp_dict:
+    agp_dict[scaff_name] += new_record
+else:
+    agp_dict[scaff_name]  = new_record
+</pre><span class="usedin">Used in <a href="#5">5</a>.</span></div>
+
+
+<h1>GFF file and output</h1>
+
+<p>The GFF file contains two types of lines: lines which begin by <code>#</code>
+and record lines (tab-separated values).</p>
+
+<div class="codeblock"><span class="codeblock_name"><a id="8">8</a> {<strong>proces GFF file and generate output</strong>} =</span>
+
+<pre class="prettyprint language-python">
+start_gene_line = ''
+line = gff_file.readline()
+gff_line_number = 1
+
+# loop until file is over
+while line != '':
+    <code class="chunk_ref">@{continue if line begins with `#`; updating `start_gene_line` <a href="#9">9</a>}</code>
+    # At this point we're at a tab-separated line,
+    # a record corresponding to a gene.
+    <code class="chunk_ref">@{extract fields from line <a href="#10">10</a>}</code>
+    <code class="chunk_ref">@{output processed line; warn on error <a href="#11">11</a>}</code>
+
+    line = gff_file.readline()
+    gff_line_number += 1 
+</pre><span class="usedin">Used in <a href="#2">2</a>.</span></div>
+
+
+<p>The only</p>
+
+<div class="codeblock"><span class="codeblock_name"><a id="9">9</a> {<strong>continue if line begins with `#`; updating `start_gene_line`</strong>} =</span>
+
+<pre class="prettyprint language-python">
+if line[0] == '#':
+    if line[:12] == '# start gene':
+        start_gene_line = line
+    else:
+        print(line, end="", file=out_file)
+
+    continue
+</pre><span class="usedin">Used in <a href="#8">8</a>.</span></div>
+
+
+
+
+<div class="codeblock"><span class="codeblock_name"><a id="10">10</a> {<strong>extract fields from line</strong>} =</span>
+
+<pre class="prettyprint language-python">
+split_line = line.rstrip().split('\t')
+scaff_name = split_line[0]
+scaff_beg  = int(split_line[3]) # begin and end positions,
+scaff_end  = int(split_line[4]) # relative to the scaffold
+direction  = split_line[6]
+</pre><span class="usedin">Used in <a href="#8">8</a>.</span></div>
+
+
+<h2></h2>
+
+<div class="codeblock"><span class="codeblock_name"><a id="11">11</a> {<strong>output processed line; warn on error</strong>} =</span>
+
+<pre class="prettyprint language-python">
+if scaff_name in agp_dict:
+    scaff_list = agp_dict[scaff_name]
+    for [cn, cb, ce, sn, sb, se, dr] in scaff_list:
+        if (scaff_beg >= sb) and (scaff_end <= se):
+            <code class="chunk_ref">@{update (and print) line and break out of loop <a href="#12">12</a>}</code>
+    else:
+        <code class="chunk_ref">@{warn of split gene and skip to the next gene in the scaffold <a href="#13">13</a>}</code>
+else:
+
+    if start_gene_line != '':
+        print(start_gene_line, end='', file=out_file)
+        start_gene_line = ''
+    print(line, end='\n', file=out_file)
+
+    <code class="chunk_ref">@{warn of missing scaffold in AGP file <a href="#14">14</a>}</code>
+</pre><span class="usedin">Used in <a href="#8">8</a>.</span></div>
+
+
+
+
+<div class="codeblock"><span class="codeblock_name"><a id="12">12</a> {<strong>update (and print) line and break out of loop</strong>} =</span>
+
+<pre class="prettyprint language-python">
+split_line[0] = cn
+
+if dr == '+':
+    split_line[3] = str(scaff_beg + cb - 1)
+    split_line[4] = str(scaff_end + cb - 1)
+else:
+    split_line[3] = str(ce - scaff_end + 1)
+    split_line[4] = str(ce - scaff_beg + 1)
+
+if direction == dr:
+    split_line[6] = '+'
+else:
+    split_line[6] = '-'
+
+if start_gene_line != '':
+    print(start_gene_line, end='', file=out_file)
+    start_gene_line = ''
+print('\t'.join(split_line), end='\n', file=out_file)
+
+break
+</pre><span class="usedin">Used in <a href="#11">11</a>.</span></div>
+
+
+
+
+<div class="codeblock"><span class="codeblock_name"><a id="13">13</a> {<strong>warn of split gene and skip to the next gene in the scaffold</strong>} =</span>
+
+<pre class="prettyprint language-python">
+print("! l.%d  Warning: gene (%s) split in scaffold (%s)" %
+      (gff_line_number, split_line[-1][3:], scaff_name))
+
+while not line[0:12] == "# start gene":
+    line = gff_file.readline()
+    gff_line_number += 1
+
+continue
+</pre><span class="usedin">Used in <a href="#11">11</a>.</span></div>
+
+
+
+
+<div class="codeblock"><span class="codeblock_name"><a id="14">14</a> {<strong>warn of missing scaffold in AGP file</strong>} =</span>
+
+<pre class="prettyprint language-python">
+print('l%4d of GFF file: could not find scaffold (%s) not found in AGP file (%s).' % (gff_line_number, scaff_name, agp_filename))
+</pre><span class="usedin">Used in <a href="#11">11</a>.</span></div>
+
+
+<h1>License</h1>
+
+<p>Copyright &copy; 2017, 2018: Tássio Naia and Sophie Tandonnet,
+licensed under GPL version 3.0 or later.</p>
+
+<h2>Word index</h2>
+
+<ul>
+<li class="dict_letter">A<ul>
+<li>AGP: <a href="#14">14</a></li>
+<li>At: <a href="#8">8</a></li>
+</li></ul>
+<li class="dict_letter">G<ul>
+<li>GFF: <a href="#14">14</a></li>
+</li></ul>
+<li class="dict_letter">W<ul>
+<li>Warning: <a href="#13">13</a></li>
+</li></ul>
+<li class="dict_letter">A<ul>
+<li>agp_dict: <a href="#5">5</a>, <a href="#7">7</a>, <a href="#11">11</a></li>
+<li>agp_file: <a href="#2">2</a>, <a href="#5">5</a></li>
+<li>agp_filename: <a href="#2">2</a>, <a href="#3">3</a>, <a href="#14">14</a></li>
+<li>and: <a href="#5">5</a>, <a href="#10">10</a>, <a href="#11">11</a></li>
+<li>argv: <a href="#3">3</a></li>
+<li>as: <a href="#2">2</a></li>
+<li>at: <a href="#8">8</a></li>
+</li></ul>
+<li class="dict_letter">B<ul>
+<li>begin: <a href="#5">5</a>, <a href="#10">10</a></li>
+<li>break: <a href="#12">12</a></li>
+</li></ul>
+<li class="dict_letter">C<ul>
+<li>cb: <a href="#11">11</a>, <a href="#12">12</a></li>
+<li>ce: <a href="#11">11</a>, <a href="#12">12</a></li>
+<li>chrom_beg: <a href="#5">5</a>, <a href="#7">7</a></li>
+<li>chrom_end: <a href="#5">5</a>, <a href="#7">7</a></li>
+<li>chrom_name: <a href="#5">5</a>, <a href="#7">7</a></li>
+<li>chromosome: <a href="#5">5</a></li>
+<li>cn: <a href="#11">11</a>, <a href="#12">12</a></li>
+<li>continue: <a href="#6">6</a>, <a href="#9">9</a>, <a href="#13">13</a></li>
+<li>corresponding: <a href="#8">8</a></li>
+<li>could: <a href="#14">14</a></li>
+</li></ul>
+<li class="dict_letter">D<ul>
+<li>direction: <a href="#5">5</a>, <a href="#7">7</a>, <a href="#10">10</a>, <a href="#12">12</a></li>
+<li>dr: <a href="#11">11</a>, <a href="#12">12</a></li>
+</li></ul>
+<li class="dict_letter">E<ul>
+<li>else: <a href="#7">7</a>, <a href="#9">9</a>, <a href="#11">11</a>, <a href="#12">12</a></li>
+<li>end: <a href="#5">5</a>, <a href="#9">9</a>, <a href="#10">10</a>, <a href="#11">11</a>, <a href="#12">12</a></li>
+</li></ul>
+<li class="dict_letter">F<ul>
+<li>file: <a href="#8">8</a>, <a href="#9">9</a>, <a href="#11">11</a>, <a href="#12">12</a>, <a href="#14">14</a></li>
+<li>find: <a href="#14">14</a></li>
+<li>for: <a href="#5">5</a>, <a href="#11">11</a></li>
+<li>found: <a href="#14">14</a></li>
+</li></ul>
+<li class="dict_letter">G<ul>
+<li>gene: <a href="#8">8</a>, <a href="#9">9</a>, <a href="#13">13</a></li>
+<li>gff_file: <a href="#2">2</a>, <a href="#8">8</a>, <a href="#13">13</a></li>
+<li>gff_filename: <a href="#2">2</a>, <a href="#3">3</a></li>
+<li>gff_line_number: <a href="#8">8</a>, <a href="#13">13</a>, <a href="#14">14</a></li>
+</li></ul>
+<li class="dict_letter">I<ul>
+<li>if: <a href="#6">6</a>, <a href="#7">7</a>, <a href="#9">9</a>, <a href="#11">11</a>, <a href="#12">12</a></li>
+<li>import: <a href="#4">4</a></li>
+<li>in: <a href="#5">5</a>, <a href="#7">7</a>, <a href="#11">11</a>, <a href="#13">13</a>, <a href="#14">14</a></li>
+<li>int: <a href="#5">5</a>, <a href="#10">10</a></li>
+<li>is: <a href="#8">8</a></li>
+</li></ul>
+<li class="dict_letter">J<ul>
+<li>join: <a href="#12">12</a></li>
+</li></ul>
+<li class="dict_letter">L<ul>
+<li>line: <a href="#5">5</a>, <a href="#6">6</a>, <a href="#8">8</a>, <a href="#9">9</a>, <a href="#10">10</a>, <a href="#11">11</a>, <a href="#13">13</a></li>
+<li>loop: <a href="#8">8</a></li>
+</li></ul>
+<li class="dict_letter">N<ul>
+<li>new_record: <a href="#7">7</a></li>
+<li>not: <a href="#13">13</a>, <a href="#14">14</a></li>
+</li></ul>
+<li class="dict_letter">O<ul>
+<li>of: <a href="#14">14</a></li>
+<li>open: <a href="#2">2</a></li>
+<li>out_file: <a href="#2">2</a>, <a href="#9">9</a>, <a href="#11">11</a>, <a href="#12">12</a></li>
+<li>out_filename: <a href="#2">2</a>, <a href="#3">3</a></li>
+<li>over: <a href="#8">8</a></li>
+</li></ul>
+<li class="dict_letter">P<ul>
+<li>point: <a href="#8">8</a></li>
+<li>positions: <a href="#5">5</a>, <a href="#10">10</a></li>
+<li>print: <a href="#9">9</a>, <a href="#11">11</a>, <a href="#12">12</a>, <a href="#13">13</a>, <a href="#14">14</a></li>
+</li></ul>
+<li class="dict_letter">R<ul>
+<li>re: <a href="#8">8</a></li>
+<li>readline: <a href="#8">8</a>, <a href="#13">13</a></li>
+<li>record: <a href="#8">8</a></li>
+<li>relative: <a href="#5">5</a>, <a href="#10">10</a></li>
+<li>rstrip: <a href="#6">6</a>, <a href="#10">10</a></li>
+</li></ul>
+<li class="dict_letter">S<ul>
+<li>sb: <a href="#11">11</a></li>
+<li>scaff_beg: <a href="#5">5</a>, <a href="#7">7</a>, <a href="#10">10</a>, <a href="#11">11</a>, <a href="#12">12</a></li>
+<li>scaff_end: <a href="#5">5</a>, <a href="#7">7</a>, <a href="#10">10</a>, <a href="#11">11</a>, <a href="#12">12</a></li>
+<li>scaff_list: <a href="#11">11</a></li>
+<li>scaff_name: <a href="#5">5</a>, <a href="#7">7</a>, <a href="#10">10</a>, <a href="#11">11</a>, <a href="#13">13</a>, <a href="#14">14</a></li>
+<li>scaffold: <a href="#5">5</a>, <a href="#10">10</a>, <a href="#13">13</a>, <a href="#14">14</a></li>
+<li>se: <a href="#11">11</a></li>
+<li>separated: <a href="#8">8</a></li>
+<li>sn: <a href="#11">11</a></li>
+<li>split: <a href="#6">6</a>, <a href="#10">10</a>, <a href="#13">13</a></li>
+<li>split_line: <a href="#5">5</a>, <a href="#6">6</a>, <a href="#10">10</a>, <a href="#12">12</a>, <a href="#13">13</a></li>
+<li>start: <a href="#9">9</a>, <a href="#13">13</a></li>
+<li>start_gene_line: <a href="#8">8</a>, <a href="#9">9</a>, <a href="#11">11</a>, <a href="#12">12</a></li>
+<li>str: <a href="#12">12</a></li>
+<li>sys: <a href="#3">3</a>, <a href="#4">4</a></li>
+</li></ul>
+<li class="dict_letter">T<ul>
+<li>tab: <a href="#8">8</a></li>
+<li>the: <a href="#5">5</a>, <a href="#10">10</a></li>
+<li>this: <a href="#8">8</a></li>
+<li>to: <a href="#5">5</a>, <a href="#8">8</a>, <a href="#10">10</a></li>
+</li></ul>
+<li class="dict_letter">U<ul>
+<li>until: <a href="#8">8</a></li>
+</li></ul>
+<li class="dict_letter">W<ul>
+<li>we: <a href="#8">8</a></li>
+<li>while: <a href="#8">8</a>, <a href="#13">13</a></li>
+<li>with: <a href="#2">2</a></li>
+</li></ul>
+<li class="dict_letter">Y<ul>
+<li>yes: <a href="#6">6</a></li>
+</ul></ul>
+
+</body></html>

@@ -1,0 +1,266 @@
+# GFF processing
+
+This is a literate python script to processes GFF files,
+combining the information with that of an AGP file.
+(See copyright note at the end of this file.)
+It receives as arguments paths to
+
+- an AGP file, 
+- a GFF file, and
+- an output file.
+
+## More details
+
+In an AGP file, each line (other then the header) describes either
+
+- a chromosome inside of some scaffold
+- a gap in the scaffold
+
+Here is a sample from the first lines of an AGP file. 
+
+    ##agp-version	2.0
+    # Format: object object_beg object_end part_number  W  component_id component_beg component_end  orientation
+    #   Gaps: object object_beg object_end part_number  N  gap_length    gap_type       linkage
+    lg1	1	163002	1	W	nRsb347.2.0.scaf00004	1	163002	-
+    lg1	163003	163102	2	U	100	scaffold	yes	map
+    lg1	163103	1173791	3	W	nRsb347.2.0.scaf00012	1	1010689	-
+    lg1	1173792	1173891	4	U	100	scaffold	yes	map
+    lg1	1173892	1943698	5	W	nRsb347.2.0.scaf00020	1	769807	-
+    lg1	1943699	1943798	6	U	100	scaffold	yes	map
+    lg1	1943799	2602982	7	W	nRsb347.2.0.scaf00024	1	659184	-
+    lg1	2602983	2603082	8	U	100	scaffold	yes	map
+    lg1	2603083	3201891	9	W	nRsb347.2.0.scaf00027	1	598809	-
+    lg1	3201892	3201991	10	U	100	scaffold	yes	map
+    lg1	3201992	3735152	11	W	nRsb347.2.0.scaf00030	1	533161	-
+    lg1	3735153	3735252	12	U	100	scaffold	yes	map
+
+For instance, in the file above, positions 1 to 163002 of chromosome 'lg1' 
+correspond to positions 1 to 163002 of scaffold 'nRsb347.2.0.scaf00004'.
+
+Now the GFF file contains information about which genes lie in each scaffold.
+Each gene is represented by a series of lines in the GFF file, so the lines 
+corresponding to gene `XXX` go from the line `# start gene XXX` to the line
+`# end gene XXX`.
+
+    ##gff-version 3
+    # This output was generated with AUGUSTUS (version 3.0.3).
+    # AUGUSTUS is a gene prediction tool for eukaryotes written by Mario Stanke (mario.stanke@uni-greifswald.de),
+    # Oliver Keller, Stefanie König and Lizzy Gerischer.
+    # Please cite: Mario Stanke, Mark Diekhans, Robert Baertsch, David Haussler (2008),
+    # Using native and syntenically mapped cDNA alignments to improve de novo gene finding
+    # Bioinformatics 24: 637-644, doi 10.1093/bioinformatics/btn013
+    # Sources of extrinsic information: M E
+    # reading in the file ../../hints/hints.gff ...
+    # Have extrinsic information about 263 sequences (in the specified range).
+    # Initialising the parameters using config directory /exports/software/augustus/augustus-3.0.3/config/ ...
+    # Rsb version. Using default transition matrix.
+    # admissible start codons and their probabilities: ATG(0.998), CTG(0.000815), TTG(0.0013)
+    # start gene g1
+    nRsb347.2.0.scaf00001	AUGUSTUS	gene	6504	8593	0.11	+	.	ID=g1
+    nRsb347.2.0.scaf00001	AUGUSTUS	transcript	6504	8593	0.11	+	.	ID=g1.t1;Parent=g1;Name=hypothetical protein Y032_0445g1585 [Ancylostoma ceylanicum];Alias=SPIN-1 [Caenorhabditis elegans] &gt;gi|3874275|emb|CAB07311.1| SPIN-1 [Caenorhabditis elegans];Note=protein spinster -like protein 1
+    nRsb347.2.0.scaf00001	AUGUSTUS	start_codon	6504	6506	.	+	0	Parent=g1.t1,g1
+    nRsb347.2.0.scaf00001	AUGUSTUS	initial	6504	6624	0.75	+	0	Parent=g1.t1,g1
+    nRsb347.2.0.scaf00001	AUGUSTUS	internal	6676	6796	1	+	2	Parent=g1.t1,g1
+    nRsb347.2.0.scaf00001	AUGUSTUS	internal	6842	6923	0.99	+	1	Parent=g1.t1,g1
+    nRsb347.2.0.scaf00001	AUGUSTUS	internal	6967	7118	1	+	0	Parent=g1.t1,g1
+    nRsb347.2.0.scaf00001	AUGUSTUS	internal	7162	7244	1	+	1	Parent=g1.t1,g1
+    nRsb347.2.0.scaf00001	AUGUSTUS	internal	7287	7422	0.58	+	2	Parent=g1.t1,g1
+    nRsb347.2.0.scaf00001	AUGUSTUS	internal	7477	7629	0.58	+	1	Parent=g1.t1,g1
+
+    [ . . . ommited lines . . . ]
+
+    nRsb347.2.0.scaf00001	AUGUSTUS	CDS	8408	8593	0.6	+	0	Parent=g1.t1,g1
+    nRsb347.2.0.scaf00001	AUGUSTUS	stop_codon	8591	8593	.	+	0	Parent=g1.t1,g1
+    # protein sequence = [MVPLNTSKNIDEKSGFARYAPILIFTTINLLNYMDRYTVAGVLDQIQNYYHIDDAMGGLIQTMFMAFYIVFSPTAGFL
+    # GDRYNRKWIMVIGITLWVIIVLASSFVPSNLFPVFLVLRGLVGVGEASYAIICPSVIADMYTGVWRSRMLMVFYFATPVGSGLGFIVGSAVSSWLGSW
+    # KWGVRITCVFGVICILLIILFVEEPERGAAEREIGHIKAEVKNSGYLKDLWELCKNPTYITSSLGYTALVFGVGTLSWWMPTAIERKDAWKKGLNSTS
+    # ELSTDATDRINLYFGMITLVAGLLGVTMGTLISNLMSNGIKVICFKIKTKRSDAIICCVGAIIGIPTMLIGIWAITDHMILCWIMLFICCTALSFNWS
+    # TNVDMLMSVVIPSRRNTANAFQILLSHLLGDGSGPYVLGAISDALQGGNKSVQSQFQALQKSFYLADIVLVLGAVLFGVSAFTVVRDQQKFAEEMGEE
+    # HCS]
+    # Evidence for and against this transcript:
+    # % of transcript supported by hints (any source): 0
+    # CDS exons: 0/12
+    # CDS introns: 0/11
+    # 5'UTR exons and introns: 0/0
+    # 3'UTR exons and introns: 0/0
+    # hint groups fully obeyed: 0
+    # incompatible hint groups: 0
+    # end gene g1
+    # start gene g2
+    nRsb347.2.0.scaf00001	AUGUSTUS	gene	9008	11343	0.78	-	.	ID=g2
+    nRsb347.2.0.scaf00001	AUGUSTUS	transcript	9008	11343	0.78	-	.	ID=g2.t1;Parent=g2;Name=hypothetical protein ANCDUO_22561 [Ancylostoma duodenale];Alias=Hypothetical protein CBG05511 [Caenorhabditis briggsae] &gt;gi|187035053|emb|CAP25980.1| Protein CBG05511 [Caenorhabditis briggsae];Note=pua domain containing protein
+    nRsb347.2.0.scaf00001	AUGUSTUS	stop_codon	9008	9010	.	-	0	Parent=g2.t1,g2
+    nRsb347.2.0.scaf00001	AUGUSTUS	terminal	9008	9145	0.99	-	0	Parent=g2.t1,g2
+
+
+Here is the program outline.
+
+``` python gff.py
+@{imports}
+@{process arguments}
+
+@{read files and generate output}
+```
+
+
+We open all files upfront, so we break sooner rather than later.
+
+``` python read files and generate output
+with open(agp_filename, 'r') as agp_file:
+    with open(gff_filename, 'r') as gff_file:
+        with open(out_filename, 'w') as out_file:
+
+            @{process AGP file}
+            @{proces GFF file and generate output}
+```
+ 
+``` python process arguments
+agp_filename = sys.argv[-3]
+gff_filename = sys.argv[-2]
+out_filename = sys.argv[-1]
+```
+
+``` python imports
+import sys
+```
+
+``` python process AGP file
+agp_dict = {}
+
+for line in agp_file:
+    @{set `split_line`; continue if header or gap line}
+
+    chrom_name = split_line[0]
+    chrom_beg  = int(split_line[1]) # begin and end positions,
+    chrom_end  = int(split_line[2]) # relative to the chromosome
+    scaff_name = split_line[5]
+    scaff_beg  = int(split_line[6]) # begin and end positions,
+    scaff_end  = int(split_line[7]) # relative to the scaffold
+    direction  = split_line[8]
+
+    @{store fields in `agp_dict`}
+```
+
+``` python set `split_line`; continue if header or gap line
+if line[0] == '#':
+    continue
+
+split_line = line.rstrip().split('\t')
+
+if split_line[7] == 'yes':
+    continue
+```
+
+``` python store fields in `agp_dict`
+new_record = [[chrom_name, chrom_beg, chrom_end, scaff_name, scaff_beg, scaff_end, direction]]
+if scaff_name in agp_dict:
+    agp_dict[scaff_name] += new_record
+else:
+    agp_dict[scaff_name]  = new_record
+```
+
+# GFF file and output
+
+The GFF file contains two types of lines: lines which begin by `#` 
+and record lines (tab-separated values).
+
+``` python proces GFF file and generate output
+start_gene_line = ''
+line = gff_file.readline()
+gff_line_number = 1
+
+# loop until file is over
+while line != '':
+    @{continue if line begins with `#`; updating `start_gene_line`}
+    # At this point we're at a tab-separated line,
+    # a record corresponding to a gene.
+    @{extract fields from line}
+    @{output processed line; warn on error}
+
+    line = gff_file.readline()
+    gff_line_number += 1 
+```
+
+The only 
+
+``` python continue if line begins with `#`; updating `start_gene_line`
+if line[0] == '#':
+    if line[:12] == '# start gene':
+        start_gene_line = line
+    else:
+        print(line, end="", file=out_file)
+
+    continue
+```
+
+``` python extract fields from line
+split_line = line.rstrip().split('\t')
+scaff_name = split_line[0]
+scaff_beg  = int(split_line[3]) # begin and end positions,
+scaff_end  = int(split_line[4]) # relative to the scaffold
+direction  = split_line[6]
+```
+
+## 
+
+``` python output processed line; warn on error
+if scaff_name in agp_dict:
+    scaff_list = agp_dict[scaff_name]
+    for [cn, cb, ce, sn, sb, se, dr] in scaff_list:
+        if (scaff_beg >= sb) and (scaff_end <= se):
+            @{update (and print) line and break out of loop}
+    else:
+        @{warn of split gene and skip to the next gene in the scaffold}
+else:
+
+    if start_gene_line != '':
+        print(start_gene_line, end='', file=out_file)
+        start_gene_line = ''
+    print(line, end='\n', file=out_file)
+
+    @{warn of missing scaffold in AGP file}
+```
+
+``` python update (and print) line and break out of loop
+split_line[0] = cn
+
+if dr == '+':
+    split_line[3] = str(scaff_beg + cb - 1)
+    split_line[4] = str(scaff_end + cb - 1)
+else:
+    split_line[3] = str(ce - scaff_end + 1)
+    split_line[4] = str(ce - scaff_beg + 1)
+
+if direction == dr:
+    split_line[6] = '+'
+else:
+    split_line[6] = '-'
+
+if start_gene_line != '':
+    print(start_gene_line, end='', file=out_file)
+    start_gene_line = ''
+print('\t'.join(split_line), end='\n', file=out_file)
+
+break
+```
+
+``` python warn of split gene and skip to the next gene in the scaffold
+print("! l.%d  Warning: gene (%s) split in scaffold (%s)" %
+      (gff_line_number, split_line[-1][3:], scaff_name))
+
+while not line[0:12] == "# start gene":
+    line = gff_file.readline()
+    gff_line_number += 1
+
+continue
+```
+
+``` python warn of missing scaffold in AGP file
+print('l%4d of GFF file: could not find scaffold (%s) not found in AGP file (%s).' % (gff_line_number, scaff_name, agp_filename))
+```
+
+# License
+
+Copyright (c) 2017, 2018: Tássio Naia and Sophie Tandonnet,
+licensed under GPL version 3.0 or later. 
+
